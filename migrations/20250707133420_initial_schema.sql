@@ -37,7 +37,6 @@ CREATE TABLE Users (
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    last_login TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(tenant_id, username),
