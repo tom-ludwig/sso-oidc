@@ -1,0 +1,15 @@
+[package]
+name = "sso-oidc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.4"
+dotenv = "0.15.0"
+futures = "0.3.31"
+serde = { version = "1.0.219", features = ["derive"] }
+tokio = { version = "1.46.1", features = ["full"] }
+sqlx = { version = "0.5", features = ["postgres", "runtime-tokio-native-tls"] }
+
+[build-dependencies]
+syn = "1"
