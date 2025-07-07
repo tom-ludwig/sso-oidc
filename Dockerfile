@@ -1,30 +1,34 @@
-# Stage 1: Building
-FROM rust:alpine3.19 as builder
-WORKDIR /usr/src
+# Stage 1: Build
+FROM rust:bullseye as builder
 
-# Install dependencies
-RUN apk add --no-cache gcc musl-dev
+WORKDIR /usr/src/app
 
-# Copy over your MANIFEST.in (i.e., Cargo.toml & Cargo.lock)
-COPY ./Cargo.toml ./Cargo.toml
-COPY ./Cargo.lock ./Cargo.lock
+# Install required packages for linking OpenSSL
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    curl
 
-# Copy your source code
-COPY ./src ./src
+# Copy manifest and source
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
 
-# Build for release.
-# Your final executable will be placed in target/release/my_project
+# Build release binary
 RUN cargo build --release
 
-# Stage 2: Running
-FROM alpine:latest
+# Stage 2: Run
+FROM debian:bullseye-slim
 
 WORKDIR /app
 
-# Copy the binary from the builder stage
-COPY --from=builder /usr/src/target/release/ /app/
+# Install shared libraries needed for runtime
+RUN apt-get update && apt-get install -y \
+    libssl1.1 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/src/app/target/release/sso-oidc .
 
 EXPOSE 8080
 
-# Set the startup command to run your binary
 CMD ["./sso-oidc"]
