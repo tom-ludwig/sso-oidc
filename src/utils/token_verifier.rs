@@ -45,7 +45,7 @@ impl TokenVerifier {
         &self,
         token: &str,
     ) -> Result<TokenData<RefreshTokenClaims>, jsonwebtoken::errors::Error> {
-        // Adjust validation if you use HS256 or opaque tokens for refresh tokens
+        // TODO: Adjust validation to use HS256 or opaque tokens for refresh tokens
         let mut validation = Validation::new(Algorithm::RS256);
         // Typically audience is optional or different for refresh tokens
         validation.set_issuer(&[self.issuer.as_str()]);
