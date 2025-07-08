@@ -4,7 +4,7 @@ set -e
 
 echo "🧪 Testing Docker-based Makefile commands..."
 
-# Load environment variables from .env.shared if it exists
+# Load environment variables from .env.dev if it exists
 if [ -f .env.dev ]; then
     set -a
     source .env.dev
