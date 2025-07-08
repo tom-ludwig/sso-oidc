@@ -1,31 +1,51 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ButtonIcon } from "@/components/ui/button-arrow-left";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export function CustomRegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+    } else {
+      setError("");
+      console.log("Form submitted");
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+        <CardHeader className="flex flex-wrap items-center">
+          <Link to="/">
+            <ButtonIcon />
+          </Link>
+          <CardTitle>Register for an account</CardTitle>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid grid-cols-2 grid-rows-2 gap-1">
                 <Label
@@ -67,30 +87,56 @@ export function CustomRegisterForm({
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="grid gap-3">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Repeat your password</Label>
+                </div>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">
-                  Login
+                  Register
                 </Button>
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup" className="underline underline-offset-4">
-                Sign up
+              Already have an account?{" "}
+              <Link to="/" className="underline underline-offset-4">
+                Login
               </Link>
             </div>
           </form>
         </CardContent>
       </Card>
+      {error && (
+        <AlertDialog
+          open={!!error}
+          onOpenChange={(open) => !open && setError("")}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Error</AlertDialogTitle>
+              <AlertDialogDescription>{error}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Close</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
