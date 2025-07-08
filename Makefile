@@ -2,6 +2,7 @@
 COMPOSE_FILE=docker-compose.dev.yaml
 
 include .env.dev
+export
 
 # =============================================================================
 # Container Runtime Detection
@@ -153,7 +154,7 @@ logs-db:
 
 db-shell:
 	@echo "🐚 Opening database shell using $(CONTAINER_RUNTIME)..."
-	$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec db psql -U $(DATABASE_USER) -d $(DATABASE_NAME)
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 health-check:
 	@echo "🏥 Running health checks using $(CONTAINER_RUNTIME)..."
