@@ -32,7 +32,7 @@ impl UserService {
         let (_salt, hashed_password) = match hash_password(login_request.password_unhashed.as_str())
         {
             Ok((_salt, hashed_password)) => (_salt, hashed_password),
-            Err(_) => return Some(true),
+            Err(_) => return Some(false),
         };
 
         match result {
