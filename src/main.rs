@@ -16,7 +16,7 @@ mod utils;
 async fn main() {
     let db_pool = init_db_pool()
         .await
-        .expect("Failed to connect to the database: {:?}");
+        .expect("Failed to connect to the database.");
 
     println!("Successfully connected to the database");
 
