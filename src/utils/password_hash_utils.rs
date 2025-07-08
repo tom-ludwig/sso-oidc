@@ -2,7 +2,6 @@ use argon2::password_hash::{
     Error as PasswordHashError, PasswordHash, SaltString, rand_core::OsRng,
 };
 use argon2::{Argon2, PasswordHasher, PasswordVerifier};
-use base64::{Engine, engine::general_purpose};
 
 /// Hashes a password with a new random salt.
 /// Returns (salt, password_hash)
