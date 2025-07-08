@@ -1,7 +1,7 @@
 import { LoginForm } from "@/components/login-form";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { CustomRegisterForm } from "@/components/custom-register-form";
+import { RegisterForm } from "@/components/register-form";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 export default function App() {
@@ -45,7 +45,7 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/" element={<LoginForm />} />
-            <Route path="/signup" element={<CustomRegisterForm />} />
+            <Route path="/signup" element={<RegisterForm />} />
           </Routes>
         </Router>
       </div>
