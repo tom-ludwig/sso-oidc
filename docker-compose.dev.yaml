@@ -5,12 +5,27 @@ services:
     container_name: dev-postgres
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: sso-oidc-dev
+    env_file: .env.dev
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${DATABASE_URL}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sqlx-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.sqlx-cli
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env.dev
+    volumes:
+      - .:/app
+    profiles:
+      - tools
 
 volumes:
   pg_data:
