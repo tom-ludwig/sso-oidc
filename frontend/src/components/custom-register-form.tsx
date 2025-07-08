@@ -1,17 +1,17 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Link } from "react-router-dom"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
 
-export function LoginForm({
+export function CustomRegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -27,6 +27,34 @@ export function LoginForm({
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-2 grid-rows-2 gap-1">
+                <Label
+                  htmlFor="surname"
+                  className="row-span-1 col-span-1 col-start-1 row-start-1"
+                >
+                  Surname
+                </Label>
+                <Input
+                  id="surname"
+                  type="text"
+                  placeholder="Mustermann"
+                  required
+                  className="row-span-1 col-span-1 col-start-1 row-start-2"
+                />
+                <Label
+                  htmlFor="name"
+                  className="row-span-1 col-span-2 row-start-1 col-start-2"
+                >
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Max"
+                  required
+                  className="row-span-1 col-start-2 row-start-2"
+                />
+              </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -64,6 +92,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

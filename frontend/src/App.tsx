@@ -1,50 +1,54 @@
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/components/login-form";
 import { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
+import { CustomRegisterForm } from "@/components/custom-register-form";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-export default function Page() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export default function App() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    const fetchData = async () => {
-        axios.get('http://bible-api.com/john 3:16')
-           .then(response => {
-             console.log(response.data);
-             setData(response.data);
-             setLoading(false);
-           })
-           .catch(error => {
-             console.error('Error fetching data:', error);
-             setError(error);
-             setLoading(false);
-           });
-    };
+  const fetchData = async () => {
+    axios
+      .get("http://bible-api.com/john 3:16")
+      .then((response) => {
+        console.log(response.data);
+        setData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+        setLoading(false);
+      });
+  };
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
-    if (error) {
-        // return <p>Error: {error.message}</p>;
-        return <p>Error: {error}</p>;
-    }
-    if (!data) {
-        return <p>No data yet</p>;
-    }
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+  if (error) {
+    // return <p>Error: {error.message}</p>;
+    return <p>Error: {error}</p>;
+  }
+  if (!data) {
+    return <p>No data yet</p>;
+  }
 
   return (
-    <>
-        {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
-        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-          <div className="w-full max-w-sm">
-            <LoginForm />
-          </div>
-        </div>
-    </>
-  )
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Router>
+          <Routes>
+            <Route path="/" element={<LoginForm />} />
+            <Route path="/signup" element={<CustomRegisterForm />} />
+          </Routes>
+        </Router>
+      </div>
+    </div>
+  );
 }
-
