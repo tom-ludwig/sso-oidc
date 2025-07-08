@@ -25,9 +25,9 @@ services:
     environment:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_USER: myuser
-      DATABASE_PASSWORD: mypassword
-      DATABASE_NAME: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
       REDIS_HOST: redis
       REDIS_PORT: 6379
     ports:
