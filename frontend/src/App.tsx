@@ -15,7 +15,7 @@ export default function App() {
 
   const fetchData = async () => {
     axios
-        .get("https://bible-api.com/john 3:16")
+      .get("https://bible-api.com/john 3:16")
       .then((response) => {
         console.log(response.data);
         setData(response.data);
