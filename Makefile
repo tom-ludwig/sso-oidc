@@ -2,6 +2,7 @@
 COMPOSE_FILE=docker-compose.dev.yaml
 
 include .env.dev
+export
 
 # =============================================================================
 # Container Runtime Detection
