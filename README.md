@@ -28,6 +28,7 @@ make setup
 
 This will:
 
+- Generate RSA private and public keys for JWT signing
 - Start PostgreSQL in Docker
 - Create the database
 - Run all SQL migrations
