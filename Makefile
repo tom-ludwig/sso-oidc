@@ -72,8 +72,17 @@ sqlx-prepare:
 	sqlx prepare -- --lib
 	@echo "📦 sqlx offline data prepared."
 	
+# Generate RSA private and public keys for JWT signing
+generate-keys:
+	@mkdir -p keys
+	@echo "🔑 Generating RSA 2048-bit private key at keys/private.pem"
+	@openssl genrsa -out keys/private.pem 2048
+	@echo "🔑 Generating public key at keys/public.pem"
+	@openssl rsa -in keys/private.pem -pubout -out keys/public.pem
+	@echo "✅ Keys generated!"
+
 # ALL-IN-ONE SETUP
-setup: start-db setup-db sqlx-prepare
+setup: generate-keys start-db setup-db sqlx-prepare
 	@echo "🎉 Local dev environment ready!"
 
 .PHONY: build release run run-release test clean format check setup-db reset-db sqlx-prepare start-db stop-db restart-db setup
