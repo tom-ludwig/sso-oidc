@@ -165,7 +165,7 @@ logs-db:
 
 db-shell:
 	@echo "🐚 Opening database shell using $(CONTAINER_RUNTIME)..."
-	$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec db psql -U $$DATABASE_USER -d $$DATABASE_DB
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec db psql -U $(DATABASE_USER) -d $(DATABASE_NAME)
 
 health-check:
 	@echo "🏥 Running health checks using $(CONTAINER_RUNTIME)..."
