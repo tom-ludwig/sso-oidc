@@ -1,8 +1,8 @@
-import { LoginForm } from "@/components/login-form";
-import { useState, useEffect } from "react";
+import {LoginForm} from "@/components/login-form";
+import {useEffect, useState} from "react";
 import axios from "axios";
-import { CustomRegisterForm } from "@/components/custom-register-form";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {CustomRegisterForm} from "@/components/custom-register-form";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
 export default function App() {
   const [data, setData] = useState([]);
@@ -15,7 +15,7 @@ export default function App() {
 
   const fetchData = async () => {
     axios
-      .get("http://bible-api.com/john 3:16")
+        .get("https://bible-api.com/john 3:16")
       .then((response) => {
         console.log(response.data);
         setData(response.data);
