@@ -7,20 +7,9 @@ include .env.dev
 # Container Runtime Detection
 # =============================================================================
 
-# TODO: ENTER YOUR CONTAINER RUNTIME HERE
-CONTAINER_RUNTIME := docker # or podman
-
-# Set compose command based on detected runtime
-ifeq ($(CONTAINER_RUNTIME),podman)
-	COMPOSE_CMD = podman-compose
-	CONTAINER_CMD = podman
-else ifeq ($(CONTAINER_RUNTIME),docker)
-	COMPOSE_CMD = docker-compose
-	CONTAINER_CMD = docker
-else
-	COMPOSE_CMD = docker-compose
-	CONTAINER_CMD = docker
-endif
+# TODO: ENTER YOUR CORRECT CONTAINER RUNTIME COMMANDS HERE
+CONTAINER_CMD := podman
+COMPOSE_CMD := podman compose
 
 # =============================================================================
 # Local Development Commands
@@ -148,7 +137,6 @@ setup: runtime-info generate-keys start-db db-create migrate
 # =============================================================================
 
 runtime-info:
-	@echo "🔍 Detected container runtime: $(CONTAINER_RUNTIME)"
 	@echo "📦 Using compose command: $(COMPOSE_CMD)"
 	@echo "🐳 Using container command: $(CONTAINER_CMD)"
 	@if [ "$(CONTAINER_RUNTIME)" = "none" ]; then \
