@@ -1,5 +1,5 @@
-import { LoginForm } from "@/components/login-form";
-import { useState, useEffect } from "react";
+import {LoginForm} from "@/components/login-form";
+import {useEffect, useState} from "react";
 import axios from "axios";
 import { RegisterForm } from "@/components/register-form";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -15,7 +15,7 @@ export default function App() {
 
   const fetchData = async () => {
     axios
-      .get("http://bible-api.com/john 3:16")
+        .get("https://bible-api.com/john 3:16")
       .then((response) => {
         console.log(response.data);
         setData(response.data);
