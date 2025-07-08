@@ -2,25 +2,15 @@
 COMPOSE_FILE=docker-compose.dev.yaml
 
 include .env.dev
+export
 
 # =============================================================================
 # Container Runtime Detection
 # =============================================================================
 
-# TODO: ENTER YOUR CONTAINER RUNTIME HERE
-CONTAINER_RUNTIME := docker # or podman
-
-# Set compose command based on detected runtime
-ifeq ($(CONTAINER_RUNTIME),podman)
-	COMPOSE_CMD = podman-compose
-	CONTAINER_CMD = podman
-else ifeq ($(CONTAINER_RUNTIME),docker)
-	COMPOSE_CMD = docker-compose
-	CONTAINER_CMD = docker
-else
-	COMPOSE_CMD = docker-compose
-	CONTAINER_CMD = docker
-endif
+# TODO: ENTER YOUR CORRECT CONTAINER RUNTIME COMMANDS HERE
+CONTAINER_CMD := podman
+COMPOSE_CMD := podman compose
 
 # =============================================================================
 # Local Development Commands
@@ -148,7 +138,6 @@ setup: runtime-info generate-keys start-db db-create migrate
 # =============================================================================
 
 runtime-info:
-	@echo "🔍 Detected container runtime: $(CONTAINER_RUNTIME)"
 	@echo "📦 Using compose command: $(COMPOSE_CMD)"
 	@echo "🐳 Using container command: $(CONTAINER_CMD)"
 	@if [ "$(CONTAINER_RUNTIME)" = "none" ]; then \
@@ -165,7 +154,7 @@ logs-db:
 
 db-shell:
 	@echo "🐚 Opening database shell using $(CONTAINER_RUNTIME)..."
-	$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec db psql -U $(DATABASE_USER) -d $(DATABASE_NAME)
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 health-check:
 	@echo "🏥 Running health checks using $(CONTAINER_RUNTIME)..."
