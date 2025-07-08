@@ -7,7 +7,7 @@ use crate::models::services_config::ServicesConfig;
 pub async fn get_test_user(
     Extension(services): Extension<Arc<ServicesConfig>>,
 ) -> impl IntoResponse {
-    services.user_service.test_create_user();
+    services.user_service.test_create_user().await;
 
-    return StatusCode::OK;
+    StatusCode::OK
 }
