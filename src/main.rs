@@ -8,9 +8,9 @@ use services::user_service::UserService;
 use utils::database::init_db_pool;
 use utils::redis_utils::create_redis_pool;
 
-use tower_http::cors::{CorsLayer, Any};
-use std::net::SocketAddr;
 use http::HeaderValue;
+use std::net::SocketAddr;
+use tower_http::cors::{Any, CorsLayer};
 
 mod handlers;
 mod models;
@@ -20,15 +20,10 @@ mod utils;
 
 #[tokio::main]
 async fn main() {
-    // println!("{:?}", utils::password_hash_utils::hash_password("password123"));
-    // println!("{:?}", utils::password_hash_utils::hash_password("supersecure!"));
-
-    // Newly added CorsLayer to prevent Chrome error
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
         .allow_methods(Any)
         .allow_headers(Any);
-    //
 
     let db_pool = init_db_pool()
         .await
@@ -52,14 +47,11 @@ async fn main() {
     let main_router = setup_routes(services).layer(cors);
 
     let port = 8080;
-    // let address = format!("0.0.0.0:{port}");
-    let addr = SocketAddr::from(([0,0,0,0], port));
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("Server running on: {port}");
 
     axum_server::bind(addr)
         .serve(main_router.into_make_service())
         .await
         .unwrap();
-
-    // axum::serve(listener, main_router).await.unwrap();
 }
