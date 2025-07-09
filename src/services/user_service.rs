@@ -22,7 +22,7 @@ impl UserService {
 
     /// Authorizes the user with a cookie if the credentials passed are valid
     pub async fn auth_user(&self, login_request: &LoginRequest) -> Option<bool> {
-        let query = "SELECT pass FROM users WHERE username = $1";
+        let query = "SELECT password_hash FROM Users WHERE username = $1";
 
         let result = sqlx::query(query)
             .bind(&login_request.username)
@@ -32,15 +32,15 @@ impl UserService {
         let (_salt, hashed_password) = match hash_password(login_request.password_unhashed.as_str())
         {
             Ok((_salt, hashed_password)) => (_salt, hashed_password),
-            Err(_) => return Some(false),
+            Err(_) => return None,
         };
 
         match result {
             Ok(row) => {
-                let stored_hash: String = row.try_get("pass").ok()?;
+                let stored_hash: String = row.try_get("password_hash").ok()?;
                 Some(stored_hash == hashed_password)
             }
-            Err(_) => Some(false),
+            Err(_) => None,
         }
     }
 }
