@@ -19,7 +19,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   // Please fill out later, as this is the API address where the email address and password will be sent to
-  const apiAddress = "http://localhost:800/login";
+  const apiAddress = "http://localhost:8080/auth/login";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,18 +39,18 @@ export function LoginForm({
             onSubmit={async (e) => {
               e.preventDefault();
               setError(null);
+              // TODO: Remove this later on as it is only for debugging!!
+              console.log(
+                "Sent the following to the API: email: ",
+                email,
+                "password: ",
+                password,
+              );
               try {
                 const response = await axios.post(apiAddress, {
                   email,
                   password,
                 });
-                // TODO: Remove this later on as it is only for debugging!!
-                console.log(
-                  "Sent the following to the API: email: ",
-                  email,
-                  "password: ",
-                  password,
-                );
                 console.log("Login success: ", response.data);
                 // TODO: redirect or store token here
               } catch (err: any) {
