@@ -20,6 +20,9 @@ mod utils;
 
 #[tokio::main]
 async fn main() {
+    // println!("{:?}", utils::password_hash_utils::hash_password("password123"));
+    // println!("{:?}", utils::password_hash_utils::hash_password("supersecure!"));
+
     // Newly added CorsLayer to prevent Chrome error
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
