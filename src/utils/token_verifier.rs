@@ -1,3 +1,5 @@
+use std::{fs, io};
+
 use jsonwebtoken::{Algorithm, DecodingKey, TokenData, Validation, decode};
 
 use crate::models::claims::{AccessTokenClaims, IdTokenClaims, RefreshTokenClaims};
@@ -17,6 +19,11 @@ impl TokenVerifier {
             issuer: issuer.to_string(),
             audience: audience.to_string(),
         }
+    }
+
+    pub fn from_pem_file(path: &str, issuer: &str, audience: &str) -> io::Result<Self> {
+        let pem_bytes = fs::read(path)?;
+        Ok(Self::new_rsa_pem(&pem_bytes, issuer, audience))
     }
 
     pub fn verify_id_token(

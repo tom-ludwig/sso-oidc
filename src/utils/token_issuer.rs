@@ -1,3 +1,5 @@
+use std::{fs, io};
+
 use chrono::{Duration, Utc};
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
 
@@ -16,6 +18,11 @@ impl TokenIssuer {
             issuer: issuer.to_owned(),
             encoding_key,
         }
+    }
+
+    pub fn from_pem_file(path: &str, issuer: &str) -> io::Result<Self> {
+        let pem_bytes = fs::read(path)?;
+        Ok(Self::new_rsa_pem(&pem_bytes, issuer))
     }
 
     pub fn create_id_token(
