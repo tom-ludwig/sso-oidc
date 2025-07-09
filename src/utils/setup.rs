@@ -3,7 +3,7 @@ use crate::routes::routes::setup_routes;
 use crate::services::authorize_code_service::AuthorizeCodeService;
 use crate::services::session_service::SessionService;
 use crate::services::user_service::UserService;
-use crate::utils::database::init_db_pool;
+use crate::utils::database::create_postgres_pool;
 use crate::utils::redis_utils::create_redis_pool;
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
@@ -32,7 +32,7 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
 
 async fn setup_databases()
 -> Result<(SqlxPool<Postgres>, RedisPool<RedisConnectionManager>), anyhow::Error> {
-    let sqlx_pool = init_db_pool()
+    let sqlx_pool = create_postgres_pool()
         .await
         .expect("Failed to create Postgres Connection Pool");
 
