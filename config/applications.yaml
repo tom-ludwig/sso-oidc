@@ -1,0 +1,33 @@
+applications:
+  - id: "660e8400-e29b-41d4-a716-446655440003"
+    tenant_id: "550e8400-e29b-41d4-a716-446655440003"
+    name: "SAP Concur"
+    client_id: "sap_concur_client_001"
+    client_secret: "sap_concur_secret_2024"
+    uri: "https://www.concursolutions.com"
+    redirect_uris:
+      - "https://www.concursolutions.com/auth/callback"
+    post_logout_redirect_uris:
+      - "https://www.concursolutions.com/logout"
+
+  - id: "660e8400-e29b-41d4-a716-446655440004"
+    tenant_id: "550e8400-e29b-41d4-a716-446655440004"
+    name: "Gmail"
+    client_id: "gmail_client_001"
+    client_secret: "gmail_secret_2024"
+    uri: "https://mail.google.com"
+    redirect_uris:
+      - "https://mail.google.com/auth/callback"
+    post_logout_redirect_uris:
+      - "https://mail.google.com/logout"
+
+  - id: "660e8400-e29b-41d4-a716-446655440005"
+    tenant_id: "550e8400-e29b-41d4-a716-446655440005"
+    name: "AWS Console"
+    client_id: "aws_console_client_001"
+    client_secret: "aws_console_secret_2024"
+    uri: "https://console.aws.amazon.com"
+    redirect_uris:
+      - "https://console.aws.amazon.com/auth/callback"
+    post_logout_redirect_uris:
+      - "https://console.aws.amazon.com/logout"
