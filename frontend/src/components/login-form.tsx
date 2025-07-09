@@ -18,7 +18,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const apiAddress = "http://localhost:8080/auth/login";
+  const apiAddress = "http://localhost:8080/oauth/login";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

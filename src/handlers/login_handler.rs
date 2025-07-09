@@ -1,4 +1,3 @@
-use crate::models::session::SessionData;
 use crate::models::{login::LoginRequest, services_config::ServicesConfig};
 use axum::{
     Json,
@@ -20,10 +19,11 @@ pub async fn authenticate_user(
         let session_id = Uuid::new_v4().to_string();
         let ttl: u64 = 900;
 
-        if let Err(_) = services
+        if services
             .session_service
             .set_session(&session_id, &user, ttl)
             .await
+            .is_err()
         {
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
@@ -39,13 +39,11 @@ pub async fn authenticate_user(
             Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
         };
 
-        let response = HttpResponse::builder()
+        HttpResponse::builder()
             .status(StatusCode::OK)
             .header(SET_COOKIE, cookie.to_string())
             .body(json.into())
-            .unwrap_or_else(|_| return StatusCode::INTERNAL_SERVER_ERROR.into_response());
-
-        response
+            .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
     } else {
         StatusCode::UNAUTHORIZED.into_response()
     }

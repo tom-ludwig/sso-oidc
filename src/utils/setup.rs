@@ -11,9 +11,11 @@ use crate::utils::token_verifier::TokenVerifier;
 use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
+use http::HeaderValue;
 use sqlx::{Pool as SqlxPool, Postgres};
+use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::TcpListener;
+use tower_http::cors::{Any, CorsLayer};
 
 pub async fn setup_server() -> Result<(), anyhow::Error> {
     let (sqlx_pool, redis_pool) = setup_databases()
@@ -38,14 +40,15 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
             .expect("Failed to load Certificates for Token Verifier"),
     );
 
-    let (listener, main_router) = setup_router(services, token_issuer)
+    let (main_router, addr) = setup_router(services, token_issuer)
         .await
         .expect("Failed to setup router");
 
-    println!("Server running on: {}", listener.local_addr()?);
-    axum::serve(listener, main_router)
+    println!("Server running on: {addr}");
+    axum_server::bind(addr)
+        .serve(main_router.into_make_service())
         .await
-        .expect("Server failed to start");
+        .unwrap();
 
     Ok(())
 }
@@ -88,14 +91,18 @@ fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, Appli
 async fn setup_router(
     services: Arc<ServicesConfig>,
     token_issuer: Arc<TokenIssuer>,
-) -> Result<(TcpListener, Router), anyhow::Error> {
-    let main_router = setup_routes(services, token_issuer);
+) -> Result<(Router, SocketAddr), anyhow::Error> {
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_methods(Any)
+        .allow_headers(Any);
+
+    let main_router = setup_routes(services, token_issuer).layer(cors);
 
     let port = 8080;
-    let address = format!("0.0.0.0:{port}");
-    let listener = TcpListener::bind(&address).await?;
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
 
-    Ok((listener, main_router))
+    Ok((main_router, addr))
 }
 
 async fn setup_configurations(
