@@ -1,6 +1,5 @@
-use std::sync::Arc;
-
 use axum::{Extension, Router, routing::get};
+use std::sync::Arc;
 
 use crate::{
     handlers::authorization_code_handler::authorize, models::services_config::ServicesConfig,

@@ -3,7 +3,7 @@ info:
   title: Authorization API
   version: 1.0.0
 paths:
-  /v1/authorize:
+  /oauth/authorize:
     get:
       summary: Authorization endpoint supporting OAuth2 Authorization Code flow
       description: |
@@ -76,9 +76,92 @@ paths:
                 example: Could not validate session
       security:
         - cookieAuth: []
+  /oauth/token:
+    post:
+      summary: Exchange authorization code for tokens
+      description: >
+        This endpoint is used to exchange a valid authorization code for
+        an ID token and access token, as part of the OAuth2 Authorization Code flow.
+      operationId: exchangeToken
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+                - code
+                - redirect_uri
+                - client_id
+                - client_secret
+              properties:
+                grant_type:
+                  type: string
+                  enum: ["authorization_code"]
+                  description: Must be `authorization_code`
+                code:
+                  type: string
+                  description: The authorization code received from the `/authorize` endpoint.
+                redirect_uri:
+                  type: string
+                  format: uri
+                  description: The redirect URI used in the authorization request.
+                client_id:
+                  type: string
+                  description: The client application's identifier.
+                client_secret:
+                  type: string
+                  description: The client application's secret.
+      responses:
+        "200":
+          description: Successful token response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad Request (invalid code, client mismatch, etc.)
+          content:
+            text/plain:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized (invalid client credentials)
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error (failed to issue tokens)
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   securitySchemes:
     cookieAuth:
       type: apiKey
       in: cookie
       name: session_id
+  schemas:
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: Access token for API access.
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          example: 3600
+          description: Time in seconds until the token expires.
+        id_token:
+          type: string
+          description: JWT ID token containing user identity claims.
+        refresh_token:
+          type: string
+          nullable: true
+          description: Reserved for future use (not currently implemented).

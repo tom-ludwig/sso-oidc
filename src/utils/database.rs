@@ -4,10 +4,10 @@ use sqlx::Postgres;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 
-pub async fn init_db_pool() -> Result<Pool<Postgres>, sqlx::Error> {
+pub async fn create_postgres_pool() -> Result<Pool<Postgres>, sqlx::Error> {
     dotenv().ok();
 
-    let host = env::var("DATABASE_HOST_EXTERNAL").expect("DATABASE_HOST must be set");
+    let host = env::var("DATABASE_HOST_EXTERNAL").expect("DATABASE_HOST_EXTERNAL must be set");
     let port = env::var("DATABASE_PORT").expect("DATABASE_PORT must be set");
     let user = env::var("POSTGRES_USER").expect("POSTGRES_USER must be set");
     let password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD must be set");
