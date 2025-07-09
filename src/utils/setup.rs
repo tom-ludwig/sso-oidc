@@ -86,12 +86,9 @@ async fn setup_configurations(services: Arc<ServicesConfig>) -> Result<(), anyho
     let applications_config = load_applications_config("config/applications.yaml").await?;
 
     for tenant in tenants_config.tenants {
-        if let Err(_) = services
-            .tenant_service
-            .create_tenant(Some(tenant.id), &tenant.name)
-            .await
-        {
-            println!("Tenant {} already exists. Skipping...", tenant.id);
+        let tenant_id = tenant.id.clone();
+        if let Err(_) = services.tenant_service.create_tenant(tenant).await {
+            println!("Tenant {} already exists. Skipping...", tenant_id);
         }
     }
 
