@@ -29,7 +29,6 @@ impl AuthorizeCodeService {
         let mut conn = self.redis_pool.get().await?;
         let serialized = serde_json::to_string(&data)?;
 
-        // let x = conn.set("asdf", 3).await?;
         let _: () = conn.set_ex(code, serialized, ttl_seconds).await?;
 
         Ok(())
