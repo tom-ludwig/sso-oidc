@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: Authorization API
+  version: 1.0.0
+paths:
+  /v1/authorize:
+    get:
+      summary: Authorization endpoint supporting OAuth2 Authorization Code flow
+      description: |
+        Validates `response_type`, `client_id`, and `redirect_uri`.  
+        Requires a valid user session cookie `session_id`.  
+        If no session, redirects to login UI.  
+        If valid session, generates an authorization code and redirects to `redirect_uri` with the code.
+      parameters:
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["code"]
+          description: Must be "code"
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+            example: my-client-id
+          description: Client identifier (validated against server)
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+            example: https://my-frontend.com/callback
+          description: Redirect URL after authorization (validated)
+        - name: scope
+          in: query
+          required: false
+          schema:
+            type: string
+          description: OAuth2 scope(s)
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Opaque value to be returned to the client
+        - name: nonce
+          in: query
+          required: false
+          schema:
+            type: string
+          description: String value used to associate a client session with an ID token
+      responses:
+        "302":
+          description: Redirect response
+          headers:
+            Location:
+              description: Redirect URL
+              schema:
+                type: string
+        "400":
+          description: Bad Request - invalid `response_type`, `client_id`, or `redirect_uri`
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Only 'code' response_type is supported
+        "500":
+          description: Internal Server Error - failed to validate session or issue code
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Could not validate session
+      security:
+        - cookieAuth: []
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
