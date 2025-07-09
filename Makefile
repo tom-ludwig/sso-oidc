@@ -38,6 +38,9 @@ check:
 	cargo check
 	cargo clippy
 
+build-swagger-docs:
+	$(CONTAINER_CMD) run -p 8000:8080 -e SWAGGER_JSON=/docs/openapi.yaml -v $(shell pwd)/docs:/docs swaggerapi/swagger-ui
+
 # =============================================================================
 # Key Generation for JWT Signing
 # =============================================================================
@@ -56,18 +59,23 @@ generate-keys:
 # =============================================================================
 
 start-db:
-	@echo "🚀 Starting PostgreSQL using $(CONTAINER_RUNTIME)..."
-	$(COMPOSE_CMD) -f $(COMPOSE_FILE) up -d db
-	@echo "🚀 PostgreSQL started on port 5432"
+	@echo "🚀 Starting PostgreSQL and Redis"
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) up -d db redis
+	@echo "🚀 PostgreSQL started on port 5432 and Redis on port 6379"
 
 stop-db:
-	@echo "🛑 Stopping PostgreSQL using $(CONTAINER_RUNTIME)..."
-	$(COMPOSE_CMD) -f $(COMPOSE_FILE) stop db
-	@echo "🛑 PostgreSQL stopped"
+	@echo "🛑 Stopping PostgreSQL and Redis"
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) stop db redis
+	@echo "🛑 PostgreSQL and Redis stopped"
 
 restart-db:
-	@echo "🔄 Restarting PostgreSQL using $(CONTAINER_RUNTIME)..."
-	$(COMPOSE_CMD) -f $(COMPOSE_FILE) restart db
+	@echo "🔄 Restarting PostgreSQL"
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) restart db redis
+
+reset-db:
+	@echo "🗑️ Resetting PostgreSQL and Redis"
+	$(COMPOSE_CMD) -f $(COMPOSE_FILE) down -v db redis
+	$(MAKE) start-db
 
 # =============================================================================
 # SQLx via Container (uses Dockerfile.sqlx-cli)
@@ -181,6 +189,7 @@ help:
 	@echo "  make check            - Check and lint code"
 	@echo "  make format           - Format code"
 	@echo "  make clean            - Clean build artifacts"
+	@echo "  make build-swagger-docs - Build Swagger API Documentation"
 	@echo ""
 	@echo "Keys:"
 	@echo "  make generate-keys    - Generate RSA keys for JWT signing"
@@ -189,6 +198,7 @@ help:
 	@echo "  make start-db         - Start PostgreSQL container"
 	@echo "  make stop-db          - Stop PostgreSQL container"
 	@echo "  make restart-db       - Restart PostgreSQL container"
+	@echo "  make reset-db         - Delete all Data from Redis and PostgreSQL containers and start them again"
 	@echo "  make db-status        - Show PostgreSQL container status"
 	@echo "  make logs-db          - Show PostgreSQL logs"
 	@echo "  make db-shell         - Open psql shell inside container"
@@ -215,4 +225,4 @@ help:
 build release run test clean format check generate-keys \
 start-db stop-db restart-db db-status logs-db db-shell \
 build-sqlx migrate migrate-add migrate-revert migrate-info prepare db-create db-drop db-reset \
-setup health-check help runtime-info
+setup health-check help runtime-info reset-db build-swagger-docs
