@@ -1,4 +1,3 @@
-use crate::models::services_config::ServicesConfig;
 use crate::routes::routes::setup_routes;
 use crate::services::authorize_code_service::AuthorizeCodeService;
 use crate::services::config::application_service::ApplicationService;
@@ -8,6 +7,8 @@ use crate::services::user_service::UserService;
 use crate::utils::config_loader::{load_applications_config, load_tenants_config};
 use crate::utils::database::create_postgres_pool;
 use crate::utils::redis_utils::create_redis_pool;
+use crate::utils::token_verifier::TokenVerifier;
+use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
 use sqlx::{Pool as SqlxPool, Postgres};
@@ -19,6 +20,11 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .await
         .expect("Failed to setup database and Redis pools");
 
+    let token_issuer = Arc::new(
+        TokenIssuer::from_pem_file("/keys/private.pem", "https://sso-oidc.com")
+            .expect("Failed to load Certificates for Token Issuer"),
+    );
+
     let services = setup_services(sqlx_pool.clone(), redis_pool);
     let (tenant_service, application_service) = setup_config_services(sqlx_pool);
 
@@ -26,7 +32,13 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .await
         .expect("Failed to load configurations");
 
-    let (listener, main_router) = setup_router(services)
+    // TODO: Change audience to be custom for each check
+    let _token_verifier = Arc::new(
+        TokenVerifier::from_pem_file("/keys/public.pem", "https://sso-oidc.com", "aud")
+            .expect("Failed to load Certificates for Token Verifier"),
+    );
+
+    let (listener, main_router) = setup_router(services, token_issuer)
         .await
         .expect("Failed to setup router");
 
@@ -75,8 +87,9 @@ fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, Appli
 
 async fn setup_router(
     services: Arc<ServicesConfig>,
+    token_issuer: Arc<TokenIssuer>,
 ) -> Result<(TcpListener, Router), anyhow::Error> {
-    let main_router = setup_routes(services);
+    let main_router = setup_routes(services, token_issuer);
 
     let port = 8080;
     let address = format!("0.0.0.0:{port}");
