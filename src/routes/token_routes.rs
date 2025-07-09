@@ -11,5 +11,5 @@ pub fn token_routes(service_config: Arc<ServicesConfig>, token_issuer: Arc<Token
     Router::new()
         .route("/token", post(token))
         .layer(Extension(service_config))
-    // .layer(Extension(token_issuer))
+        .layer(Extension(token_issuer))
 }
