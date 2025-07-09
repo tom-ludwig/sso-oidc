@@ -35,3 +35,7 @@ This will:
 - Prepare sqlx offline cache
 
 You can now start your local development, use `make run` to execute your code.
+
+### Documentation
+
+The API Swagger Documentation can be found, under `/docs/openapi.yaml`. To view it locally, run `make build-swagger-docs`. It's now available under `localhost:8000`.
