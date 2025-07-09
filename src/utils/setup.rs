@@ -16,7 +16,7 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .await
         .expect("Failed to setup database and Redis pools");
 
-    let services = setup_services(sqlx_pool, redis_pool).expect("Failed to setup services");
+    let services = setup_services(sqlx_pool, redis_pool);
 
     let (listener, main_router) = setup_router(services)
         .await
@@ -46,18 +46,16 @@ async fn setup_databases()
 fn setup_services(
     sqlx_pool: SqlxPool<Postgres>,
     redis_pool: RedisPool<RedisConnectionManager>,
-) -> Result<Arc<ServicesConfig>, anyhow::Error> {
+) -> Arc<ServicesConfig> {
     let user_service = UserService::new(sqlx_pool.clone());
     let auth_code_service = AuthorizeCodeService::new(sqlx_pool.clone(), redis_pool.clone());
     let session_service = SessionService::new(sqlx_pool.clone(), redis_pool);
 
-    let services = Arc::new(ServicesConfig {
+    Arc::new(ServicesConfig {
         user_service,
         auth_code_service,
         session_service,
-    });
-
-    Ok(services)
+    })
 }
 
 async fn setup_router(
