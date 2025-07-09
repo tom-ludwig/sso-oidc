@@ -19,9 +19,10 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .await
         .expect("Failed to setup database and Redis pools");
 
-    let services = setup_services(sqlx_pool, redis_pool);
+    let services = setup_services(sqlx_pool.clone(), redis_pool);
+    let (tenant_service, application_service) = setup_config_services(sqlx_pool);
 
-    setup_configurations(services.clone())
+    setup_configurations(tenant_service, application_service)
         .await
         .expect("Failed to load configurations");
 
@@ -57,16 +58,19 @@ fn setup_services(
     let user_service = UserService::new(sqlx_pool.clone());
     let auth_code_service = AuthorizeCodeService::new(sqlx_pool.clone(), redis_pool.clone());
     let session_service = SessionService::new(sqlx_pool.clone(), redis_pool);
-    let tenant_service = TenantService::new(sqlx_pool.clone());
-    let application_service = ApplicationService::new(sqlx_pool);
 
     Arc::new(ServicesConfig {
         user_service,
         auth_code_service,
         session_service,
-        tenant_service,
-        application_service,
     })
+}
+
+fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, ApplicationService) {
+    let tenant_service = TenantService::new(sqlx_pool.clone());
+    let application_service = ApplicationService::new(sqlx_pool);
+
+    (tenant_service, application_service)
 }
 
 async fn setup_router(
@@ -81,24 +85,23 @@ async fn setup_router(
     Ok((listener, main_router))
 }
 
-async fn setup_configurations(services: Arc<ServicesConfig>) -> Result<(), anyhow::Error> {
+async fn setup_configurations(
+    tenant_service: TenantService,
+    application_service: ApplicationService,
+) -> Result<(), anyhow::Error> {
     let tenants_config = load_tenants_config("config/tenants.yaml").await?;
     let applications_config = load_applications_config("config/applications.yaml").await?;
 
     for tenant in tenants_config.tenants {
         let tenant_id = tenant.id.clone();
-        if let Err(_) = services.tenant_service.create_tenant(tenant).await {
+        if let Err(_) = tenant_service.create_tenant(tenant).await {
             println!("Tenant {} already exists. Skipping...", tenant_id);
         }
     }
 
     for application in applications_config.applications {
         let application_id = application.id.clone();
-        if let Err(_) = services
-            .application_service
-            .create_application(application)
-            .await
-        {
+        if let Err(_) = application_service.create_application(application).await {
             println!("Application {} already exists. Skipping...", application_id);
         }
     }
