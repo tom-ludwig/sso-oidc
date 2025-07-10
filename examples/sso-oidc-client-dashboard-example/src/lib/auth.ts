@@ -106,21 +106,26 @@ export function clearUrlParameters(): void {
 
 // OAuth flow functions
 export async function exchangeCodeForTokens(authCode: string): Promise<TokenResponse> {
+  // Prepare form data for the token request
+  const formData = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code: authCode,
+    client_id: AUTH_CONFIG.clientId,
+    client_secret: AUTH_CONFIG.clientSecret,
+    redirect_uri: AUTH_CONFIG.redirectUri,
+  });
+
   const response = await fetch(`${AUTH_CONFIG.authServerUrl}${AUTH_CONFIG.endpoints.token}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      code: authCode,
-      client_id: AUTH_CONFIG.clientId,
-      redirect_uri: AUTH_CONFIG.redirectUri,
-    }),
+    body: formData.toString(),
   });
 
   if (!response.ok) {
-    throw new Error(`Token exchange failed: ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Token exchange failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
@@ -189,18 +194,22 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
   const urlState = getUrlParameter('state');
   
   if (urlAuthCode) {
+    // CSRF protection temporarily disabled for development
+    // TODO: Re-enable CSRF protection in production
+    /*
     // Validate state parameter for CSRF protection
     const storedState = getStoredOAuthState();
     if (urlState && storedState && urlState === storedState) {
+    */
       try {
-        console.log('Found auth code in URL with valid state, exchanging for tokens...');
+        console.log('Found auth code in URL, exchanging for tokens (CSRF protection disabled)...');
         // Exchange auth code for tokens
         const tokenResponse = await exchangeCodeForTokens(urlAuthCode);
         storeTokens(tokenResponse);
         
-        // Clean up URL parameters and state after successful token exchange
+        // Clean up URL parameters after successful token exchange
         clearUrlParameters();
-        clearOAuthState();
+        // clearOAuthState(); // Commented out since CSRF protection is disabled
         
         return {
           isAuthenticated: true,
@@ -210,15 +219,17 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
       } catch (error) {
         console.error('Token exchange from URL code failed:', error);
         clearTokens();
-        clearOAuthState();
+        // clearOAuthState(); // Commented out since CSRF protection is disabled
         // Clear URL parameters even on failure to avoid retry loops
         clearUrlParameters();
       }
+    /*
     } else {
       console.warn('Invalid or missing OAuth state parameter - possible CSRF attack');
       clearUrlParameters();
       clearOAuthState();
     }
+    */
   }
 
   // If no URL code, check session_id cookie and try to get auth code

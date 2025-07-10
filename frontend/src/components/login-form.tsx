@@ -43,8 +43,7 @@ export function LoginForm({
 
     setOauthParams({
       client_id: urlClientId || "sap_concur_client_001",
-      redirect_uri:
-        urlRedirectUri || "https://www.concursolutions.com/auth/callback",
+      redirect_uri: urlRedirectUri || "http://localhost:5555/dashboard",
       response_type: urlResponseType || "code",
       state: urlState || "",
       scope: urlScope || "",

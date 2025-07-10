@@ -7,6 +7,7 @@ export const AUTH_CONFIG = {
 
   // OAuth client configuration
   clientId: "sap_concur_client_001",
+  clientSecret: "sap_concur_secret_2024",
 
   // OAuth endpoints
   endpoints: {
