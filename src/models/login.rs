@@ -6,6 +6,6 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-pub struct User {
+pub struct UserPasswordHashSQL {
     pub password_hash: String,
 }
