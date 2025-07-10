@@ -12,7 +12,7 @@ use crate::utils::token_verifier::TokenVerifier;
 use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
-use http::HeaderValue;
+use http::{HeaderName, HeaderValue, Method};
 use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
@@ -115,24 +115,13 @@ async fn setup_router(
     jwks: Value,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
-        // New old one (from the Pepe)
-        // .allow_origin(["http://localhost:5173".parse::<HeaderValue>().unwrap()])
-        // .allow_credentials(true)
-        // .allow_methods([http::Method::GET, http::Method::POST])
-        // .allow_headers(Any);
-        // .allow_origin("http://myapp.local:5173".parse::<HeaderValue>().unwrap())
-        //
-        // Old old one
-        // .allow_origin("http://localhost:5173/".parse::<HeaderValue>().unwrap())
-        // .allow_credentials(true)
-        // .allow_methods([http::Method::GET, http::Method::POST])
-        // .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
-        // .expose_headers([LOCATION]);
-        //
-        .allow_origin(["http://localhost:5173/login".parse::<HeaderValue>().unwrap(), "http://localhost:5173/".parse::<HeaderValue>().unwrap(), "http://localhost:5173".parse::<HeaderValue>().unwrap()])
-        // .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS]) // Specify methods needed
+        .allow_headers(vec![
+            HeaderName::from_static("content-type"),
+            HeaderName::from_static("authorization"),
+        ]) // Specify common headers
+        .allow_credentials(true);
 
     let main_router = setup_routes(services, token_issuer, jwks).layer(cors);
 

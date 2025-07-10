@@ -18,7 +18,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const apiAddress = "http://localhost:8080/oauth/login";
+  const apiAddress = "http://localhost:8080/oauth";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,10 +39,16 @@ export function LoginForm({
               e.preventDefault();
               setError(null);
               try {
-                const response = await axios.post(apiAddress, {
-                  email,
-                  password,
-                });
+                const response = await axios.post(
+                  apiAddress + "/login",
+                  {
+                    email,
+                    password,
+                  },
+                  {
+                    withCredentials: true,
+                  },
+                );
                 console.log("Login success: ", response.data);
                 const authorize = async () => {
                   const url = new URL(
