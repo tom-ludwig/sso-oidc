@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
-use axum::{Extension, Json, response::IntoResponse, 
-http::{Response as HttpResponse, StatusCode, header::SET_COOKIE}};
+use axum::{
+    http::{header::SET_COOKIE, Response as HttpResponse, StatusCode},
+    response::IntoResponse,
+    Extension, Json,
+};
 
 use cookie::Cookie;
 use uuid::Uuid;
@@ -21,36 +24,38 @@ pub async fn register_user_handler(
                 .user_service
                 .get_user_id_from_email(&new_user.email)
                 .await
-                {
-        Ok(user) => user,
+            {
+                Ok(user) => user,
                 Err(_) => {
-                    return Err((StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to retrieve user id from the database.".to_string()))
-                },
+                    return Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Failed to retrieve user id from the database.".to_string(),
+                    ))
+                }
             };
 
-        let cookie = Cookie::build(("session_id", &session_id))
-            .path("/")
-            .max_age(cookie::time::Duration::seconds(ttl as i64))
-            .http_only(true)
-            .secure(true)
-            .same_site(cookie::SameSite::None);
+            let cookie = Cookie::build(("session_id", &session_id))
+                .path("/")
+                .max_age(cookie::time::Duration::seconds(ttl as i64))
+                .http_only(true)
+                .secure(true)
+                .same_site(cookie::SameSite::None);
 
-        let json = match serde_json::to_string(&user) {
-            Ok(json) => json,
-            Err(_) => return Err((StatusCode::INTERNAL_SERVER_ERROR,
-                "Could not serialize user.".to_string())),
-
-
-        };
-            Ok(
-                            HttpResponse::builder()
-            .status(StatusCode::OK)
-            .header(SET_COOKIE, cookie.to_string())
-            .body(json.into())
-            .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
-)
-        },
+            let json = match serde_json::to_string(&user) {
+                Ok(json) => json,
+                Err(_) => {
+                    return Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Could not serialize user.".to_string(),
+                    ))
+                }
+            };
+            Ok(HttpResponse::builder()
+                .status(StatusCode::OK)
+                .header(SET_COOKIE, cookie.to_string())
+                .body(json.into())
+                .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response()))
+        }
         Err(e) => {
             // Here you can customize the error message based on the description
             let error_message = e.to_string();
