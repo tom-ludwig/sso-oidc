@@ -25,7 +25,7 @@ pub async fn authenticate_user(
             Err(_) => {
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    "Failed to retrive mail address",
+                    "Failed to retrieve mail address",
                 )
                     .into_response();
             }
