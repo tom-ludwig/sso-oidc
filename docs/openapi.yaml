@@ -173,6 +173,37 @@ paths:
             text/plain:
               schema:
                 type: string
+  /register:
+    post:
+      summary: Register a new user
+      description: Creates a user with a username, email, password, and tenant ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created successfully
+        "400":
+          description: Invalid input, e.g. failed to parse tenant UUID
+          content:
+            text/plain:
+              schema:
+                type: string
+        "409":
+          description: Conflict, e.g. email already exists
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Server error, e.g. hashing failed
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   securitySchemes:
     cookieAuth:
@@ -297,3 +328,26 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Jwk"
+    CreateUserRequest:
+      type: object
+      required:
+        - tenant_id
+        - username
+        - email
+        - password
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        username:
+          type: string
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          format: password
+          example: "P@ssw0rd123"
