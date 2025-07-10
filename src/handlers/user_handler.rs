@@ -18,7 +18,7 @@ pub async fn register_user_handler(
                 Err((StatusCode::BAD_REQUEST, error_message))
             } else if error_message.contains("hashing failed") {
                 Err((StatusCode::INTERNAL_SERVER_ERROR, error_message))
-            } else if error_message.contains("email already exists") {
+            } else if error_message.contains("A user with this email or username already exists") {
                 Err((StatusCode::CONFLICT, error_message))
             } else {
                 Err((StatusCode::INTERNAL_SERVER_ERROR, error_message))
