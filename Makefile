@@ -226,3 +226,24 @@ build release run test clean format check generate-keys \
 start-db stop-db restart-db db-status logs-db db-shell \
 build-sqlx migrate migrate-add migrate-revert migrate-info prepare db-create db-drop db-reset \
 setup health-check help runtime-info reset-db build-swagger-docs
+
+insert-test-users:
+	@echo "🧪 Inserting test tenant and users..."
+	@$(COMPOSE_CMD) -f $(COMPOSE_FILE) exec -T db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) -c "\
+	DO $$ \
+	DECLARE \
+		tenant_id UUID := '00000000-0000-0000-0000-000000000001'; \
+		user1_id UUID := '11111111-1111-1111-1111-111111111111'; \
+		user2_id UUID := '22222222-2222-2222-2222-222222222222'; \
+	BEGIN \
+		-- Insert tenant \
+		INSERT INTO Tenants (id, name) \
+		VALUES (tenant_id, 'Test Tenant') \
+		ON CONFLICT (id) DO NOTHING; \
+		-- Insert users \
+		INSERT INTO Users (id, tenant_id, username, email, password_hash) VALUES \
+			(user1_id, tenant_id, 'testuser1', 'testuser1@example.com', '$$2b$$12$$abcdefghijk1234567890lmnopqrstuv'), \
+			(user2_id, tenant_id, 'testuser2', 'testuser2@example.com', '$$2b$$12$$zyxwvutsrqp0987654321nmlkjihgfedcba') \
+		ON CONFLICT (id) DO NOTHING; \
+	END $$ LANGUAGE plpgsql;"
+	@echo "✅ Test users created or already exist"
