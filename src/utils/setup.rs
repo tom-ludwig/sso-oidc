@@ -94,16 +94,15 @@ async fn setup_router(
     token_issuer: Arc<TokenIssuer>,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
-        .allow_origin(["http://localhost:5173".parse::<HeaderValue>().unwrap()])
+        // .allow_origin(["http://localhost:5173".parse::<HeaderValue>().unwrap()])
+        // .allow_credentials(true)
+        // .allow_methods([http::Method::GET, http::Method::POST])
+        // .allow_headers(Any);
+        .allow_origin("http://myapp.local:5173".parse::<HeaderValue>().unwrap())
         .allow_credentials(true)
         .allow_methods([http::Method::GET, http::Method::POST])
-        .allow_headers(Any);
-
-    // .allow_origin("http://myapp.local:5173".parse::<HeaderValue>().unwrap())
-    // .allow_credentials(true)
-    // .allow_methods([http::Method::GET, http::Method::POST])
-    // .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
-    // .expose_headers([LOCATION]);
+        .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
+        .expose_headers([LOCATION]);
 
     let main_router = setup_routes(services, token_issuer).layer(cors);
 
