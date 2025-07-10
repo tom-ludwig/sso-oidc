@@ -9,6 +9,7 @@ export default function App() {
       <div className="w-full max-w-sm">
         <Router>
           <Routes>
+            <Route path="/" element={<h1>Hello</h1>} />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<RegisterForm />} />
           </Routes>

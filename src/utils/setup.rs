@@ -12,6 +12,7 @@ use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenI
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
 use http::HeaderValue;
+use http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, LOCATION, ORIGIN};
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -23,7 +24,7 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .expect("Failed to setup database and Redis pools");
 
     let token_issuer = Arc::new(
-        TokenIssuer::from_pem_file("/keys/private.pem", "https://sso-oidc.com")
+        TokenIssuer::from_pem_file("keys/private.pem", "https://sso-oidc.com")
             .expect("Failed to load Certificates for Token Issuer"),
     );
 
@@ -36,7 +37,7 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
 
     // TODO: Change audience to be custom for each check
     let _token_verifier = Arc::new(
-        TokenVerifier::from_pem_file("/keys/public.pem", "https://sso-oidc.com", "aud")
+        TokenVerifier::from_pem_file("keys/public.pem", "https://sso-oidc.com", "aud")
             .expect("Failed to load Certificates for Token Verifier"),
     );
 
@@ -93,14 +94,22 @@ async fn setup_router(
     token_issuer: Arc<TokenIssuer>,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
-        .allow_methods(Any)
+        .allow_origin(["http://localhost:5173".parse::<HeaderValue>().unwrap()])
+        .allow_credentials(true)
+        .allow_methods([http::Method::GET, http::Method::POST])
         .allow_headers(Any);
+
+    // .allow_origin("http://myapp.local:5173".parse::<HeaderValue>().unwrap())
+    // .allow_credentials(true)
+    // .allow_methods([http::Method::GET, http::Method::POST])
+    // .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
+    // .expose_headers([LOCATION]);
 
     let main_router = setup_routes(services, token_issuer).layer(cors);
 
     let port = 8080;
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    // let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     Ok((main_router, addr))
 }
@@ -113,16 +122,20 @@ async fn setup_configurations(
     let applications_config = load_applications_config("config/applications.yaml").await?;
 
     for tenant in tenants_config.tenants {
-        let tenant_id = tenant.id.clone();
-        if let Err(_) = tenant_service.create_tenant(tenant).await {
-            println!("Tenant {} already exists. Skipping...", tenant_id);
+        let tenant_id = tenant.id;
+        if tenant_service.create_tenant(tenant).await.is_err() {
+            println!("Tenant {tenant_id} already exists. Skipping...");
         }
     }
 
     for application in applications_config.applications {
-        let application_id = application.id.clone();
-        if let Err(_) = application_service.create_application(application).await {
-            println!("Application {} already exists. Skipping...", application_id);
+        let application_id = application.id;
+        if application_service
+            .create_application(application)
+            .await
+            .is_err()
+        {
+            println!("Application {application_id} already exists. Skipping...");
         }
     }
 

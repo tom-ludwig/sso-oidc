@@ -1,8 +1,8 @@
 use crate::models::{login::LoginRequest, services_config::ServicesConfig};
 use axum::{
     Json,
-    http::{HeaderMap, HeaderValue, StatusCode, header::SET_COOKIE},
-    response::{IntoResponse, Redirect},
+    http::{Response as HttpResponse, StatusCode, header::SET_COOKIE},
+    response::IntoResponse,
 };
 use cookie::Cookie;
 use std::sync::Arc;
@@ -34,16 +34,16 @@ pub async fn authenticate_user(
             .secure(true)
             .same_site(cookie::SameSite::None);
 
-        let mut headers = HeaderMap::new();
-        headers.insert(
-            SET_COOKIE,
-            HeaderValue::from_str(&cookie.to_string()).unwrap(),
-        );
+        let json = match serde_json::to_string(&user) {
+            Ok(json) => json,
+            Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+        };
 
-        let redirect_url = "http://localhost:5173/app";
-        let redirect = Redirect::to(redirect_url);
-
-        (headers, redirect).into_response()
+        HttpResponse::builder()
+            .status(StatusCode::OK)
+            .header(SET_COOKIE, cookie.to_string())
+            .body(json.into())
+            .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
     } else {
         StatusCode::UNAUTHORIZED.into_response()
     }

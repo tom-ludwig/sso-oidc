@@ -142,8 +142,8 @@ paths:
     post:
       summary: Authenticate user and set session cookie
       description: >
-        Authenticates the user with email and password. On success, sets a `session_id` cookie
-        and redirects the user to the frontend application. On failure, returns 401 Unauthorized.
+        Authenticates a user using email and password.
+        On success, returns user info in the response body and sets a `session_id` cookie.
       requestBody:
         required: true
         content:
@@ -151,18 +151,17 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        '302':
-          description: Redirect to frontend with session cookie set
+        '200':
+          description: User successfully authenticated
           headers:
             Set-Cookie:
-              description: HTTP session cookie containing the session ID
+              description: HTTP cookie containing the session ID
               schema:
                 type: string
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: Redirecting to http://localhost:5173/app
+                $ref: '#/components/schemas/SessionData'
         '401':
           description: Invalid credentials
         '500':
@@ -208,3 +207,8 @@ components:
         password:
           type: string
           format: password
+    SessionData:
+      type: object
+      properties:
+        user_id:
+          type: string

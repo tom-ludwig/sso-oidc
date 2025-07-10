@@ -27,7 +27,7 @@ pub async fn authorize(
     // Validate client_id and redirect_uri
     // TODO: (this should be looked up from DB)
     if params.client_id != "my-client-id"
-        || params.redirect_uri != "https://my-frontend.com/callback"
+        || params.redirect_uri != "http://myapp.local:5173/callback"
     {
         return (
             StatusCode::BAD_REQUEST,
@@ -64,10 +64,12 @@ pub async fn authorize(
             "/authorize?{}",
             serde_urlencoded::to_string(&params).unwrap()
         );
+
         let login_url = format!(
-            "https://my-frontend.com/login?return_to={}",
+            "http://myapp.local:5173/login?return_to={}",
             urlencoding::encode(&return_to)
         );
+        dbg!(Redirect::temporary(&login_url).into_response());
         return Redirect::temporary(&login_url).into_response();
     }
 
