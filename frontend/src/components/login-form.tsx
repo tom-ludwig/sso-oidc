@@ -77,6 +77,7 @@ export function LoginForm({
                   },
                 );
                 console.log("Login success: ", response.data);
+                // <<<<<<< HEAD
 
                 // if (response.status == 200) {
                 //   window.location.href =
@@ -108,6 +109,28 @@ export function LoginForm({
                   window.location.href = `${apiAddress}/authorize?${authParams.toString()}`;
                 }
                 // window.location.href = apiAddress + "/authorize";
+                // =======
+                //                 const authorize = async () => {
+                //                   const url = new URL("http://localhost:8080/oauth/authorize");
+                //                   url.searchParams.append("response_type", "code");
+                //                   url.searchParams.append("client_id", "my-client-id");
+                //                   url.searchParams.append(
+                //                     "redirect_uri",
+                //                     "http://localhost:5173/",
+                //                   );
+                //                   url.searchParams.append("origin", "http://localhost:5173/");
+                //
+                //                   try {
+                //                     const response = await axios.get(url.toString(), {
+                //                       withCredentials: true,
+                //                     });
+                //                     console.log("Final response:", response);
+                //                   } catch (err) {
+                //                     console.error("Authorization fetch failed", err);
+                //                   }
+                //                 };
+                //                 authorize();
+                // >>>>>>> origin/master
               } catch (err: any) {
                 const msg =
                   err.response?.data?.message || err.message || "Login failed";
@@ -145,10 +168,8 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {/* Optional error handling */}
               {error && (
                 <Alert variant="destructive">
-                  {/* <ExclamationTriangleIcon className="h-4 w-4"> */}
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,11 +21,15 @@ export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const apiAddress = "http://localhost:8080/oauth/register";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [surname, setSurname] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (password !== confirmPassword) {
@@ -33,13 +38,43 @@ export function RegisterForm({
       setError("");
       console.log("Form submitted");
     }
+
+    let username = surname + " " + name;
+
+    try {
+      let response = await axios.post(apiAddress, {
+        tenant_id: "550e8400-e29b-41d4-a716-446655440003",
+        username,
+        email,
+        password,
+      });
+      if (response.status !== 201) {
+        return;
+      }
+
+      response = await axios.get("http://localhost:8080/oauth/login", {
+        withCredentials: true,
+      });
+
+      if (response.status !== 200) {
+        return;
+      }
+
+      axios.get("http://localhost:8080/oauth/authorize", {
+        withCredentials: true,
+      });
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message || err.message || "Registration failed";
+      setError(msg);
+    }
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="flex flex-wrap items-center">
-          <Link to="/">
+          <Link to="/login">
             <ButtonIcon />
           </Link>
           <CardTitle>Register for an account</CardTitle>
@@ -60,6 +95,7 @@ export function RegisterForm({
                   placeholder="Mustermann"
                   required
                   className="row-span-1 col-span-1 col-start-1 row-start-2"
+                  onChange={(e) => setSurname(e.target.value)}
                 />
                 <Label
                   htmlFor="name"
@@ -73,6 +109,7 @@ export function RegisterForm({
                   placeholder="Max"
                   required
                   className="row-span-1 col-start-2 row-start-2"
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div className="grid gap-3">
@@ -82,6 +119,7 @@ export function RegisterForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-3">
@@ -91,8 +129,8 @@ export function RegisterForm({
                 <Input
                   id="password"
                   type="password"
-                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               <div className="grid gap-3">
@@ -102,8 +140,8 @@ export function RegisterForm({
                 <Input
                   id="confirmPassword"
                   type="password"
-                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -114,7 +152,7 @@ export function RegisterForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link to="/" className="underline underline-offset-4">
+              <Link to="/login" className="underline underline-offset-4">
                 Login
               </Link>
             </div>
