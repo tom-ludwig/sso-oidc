@@ -55,7 +55,7 @@ pub async fn authorize(
     }
 
     // Check for user session
-    let user_id = match cookies.get("session_id") {
+    let user_id = match cookies.get("Session ID") {
         Some(session_cookie) => {
             match services
                 .session_service

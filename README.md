@@ -39,3 +39,5 @@ You can now start your local development, use `make run` to execute your code.
 ### Documentation
 
 The API Swagger Documentation can be found, under `/docs/openapi.yaml`. To view it locally, run `make build-swagger-docs`. It's now available under `localhost:8000`.
+
+test_url: `http://localhost:5173/?response_type=code&client_id=sap_concur_client_001&redirect_uri=https%3A//www.concursolutions.com/auth/callback`
