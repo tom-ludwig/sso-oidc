@@ -105,66 +105,7 @@ impl UserService {
         .map_err(|e| anyhow::anyhow!("Failed to create user: {}", e))?;
 
         Ok(new_user.id)
-
-        // sqlx::query!(
-        //     // Need to adjust SQL statement here.
-        //     // "INSERT INTO tenants (id, name) VALUES ($1, $2)",
-        //     new_user.id,
-        //     new_user.username
-        // )
     }
-
-    // // Old
-    //     let tenant_uuid = Uuid::parse_str(new_user.tenant_id)
-    //         .map_err(|e| anyhow::anyhow!("Failed to parse tenant UUID: {}", e))?;
-    //
-    //     let hashed_password = utils::password_hash_utils::hash_password(new_user.password)
-    //         .map_err(|e| anyhow::anyhow!("Password hashing failed: {}", e))?;
-    //
-    //     let user_uuid = Uuid::new_v4();
-    //
-    //     let result = query!(
-    //         r#"
-    //         INSERT INTO Users (id, tenant_id, username, email, password_hash)
-    //         VALUES ($1, $2, $3, $4, $5)
-    //         ON CONFLICT ON CONSTRAINT users_tenant_id_username_key DO NOTHING
-    //         "#,
-    //         user_uuid,
-    //         tenant_uuid,
-    //         new_user.username,
-    //         new_user.email,
-    //         hashed_password.1
-    //     )
-    //     .execute(&self.db_pool)
-    //     .await;
-    //     println!("{:?}", result);
-    //
-    //     if let Ok(pg_result) = result {
-    //         if pg_result.rows_affected() == 0 {
-    //             println!(
-    //                 "No rows affected: Conflict detected or no changes due to current constraints."
-    //             );
-    //             Err(anyhow::anyhow!(
-    //                 "A user with this email or username already exists"
-    //             ))
-    //         } else {
-    //             println!("User successfully inserted!");
-    //             Ok(())
-    //         }
-    //     } else {
-    //         match result {
-    //             Err(SqlxError::Database(db_err)) => Err(anyhow::anyhow!(
-    //                 "Database error occurred: {}",
-    //                 db_err.message()
-    //             )),
-    //             Err(SqlxError::Configuration(_)) => {
-    //                 Err(anyhow::anyhow!("Configuration error occurred"))
-    //             }
-    //             Err(SqlxError::Tls(_)) => Err(anyhow::anyhow!("TLS error occurred")),
-    //             _ => Err(anyhow::anyhow!("An unexpected error occurred")),
-    //         }
-    //     }
-    // }
 
     pub async fn get_user_id_from_email(
         &self,
