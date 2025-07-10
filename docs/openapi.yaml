@@ -138,6 +138,41 @@ paths:
             text/plain:
               schema:
                 type: string
+  /.well-known/openid-configuration:
+    get:
+      summary: OpenID Connect Discovery Document
+      description: |
+        Returns the OpenID Connect configuration for this authorization server.
+        Clients use this information to dynamically configure themselves to use your OIDC provider.
+      operationId: getOidcDiscoveryDocument
+      tags:
+        - OpenID Provider
+      responses:
+        "200":
+          description: OpenID Connect discovery metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OidcDiscoveryDocument"
+  /.well-known/jwks.json:
+    get:
+      summary: Get JWKS
+      description: Returns a JSON Web Key Set (JWKS) containing public keys used to verify JWTs.
+      tags:
+        - OpenID Provider
+      responses:
+        "200":
+          description: Successful response with JWKS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Jwks"
+        "500":
+          description: Server error during serialization
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   securitySchemes:
     cookieAuth:
@@ -165,3 +200,100 @@ components:
           type: string
           nullable: true
           description: Reserved for future use (not currently implemented).
+    OidcDiscoveryDocument:
+      type: object
+      required:
+        - issuer
+        - authorization_endpoint
+        - token_endpoint
+        - jwks_uri
+        - response_types_supported
+        - subject_types_supported
+        - id_token_signing_alg_values_supported
+        - scopes_supported
+        - token_endpoint_auth_methods_supported
+        - claims_supported
+      properties:
+        issuer:
+          type: string
+          format: uri
+          example: https://sso.example.com
+        authorization_endpoint:
+          type: string
+          format: uri
+          example: https://sso.example.com/oauth/authorize
+        token_endpoint:
+          type: string
+          format: uri
+          example: https://sso.example.com/oauth/token
+        userinfo_endpoint:
+          type: string
+          format: uri
+          nullable: true
+          example: https://sso.example.com/userinfo
+        jwks_uri:
+          type: string
+          format: uri
+          example: https://sso.example.com/.well-known/jwks.json
+        response_types_supported:
+          type: array
+          items:
+            type: string
+          example: ["code"]
+        subject_types_supported:
+          type: array
+          items:
+            type: string
+          example: ["public"]
+        id_token_signing_alg_values_supported:
+          type: array
+          items:
+            type: string
+          example: ["RS256"]
+        scopes_supported:
+          type: array
+          items:
+            type: string
+          example: ["openid", "profile", "email"]
+        token_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+          example: ["client_secret_post"]
+        claims_supported:
+          type: array
+          items:
+            type: string
+          example: ["sub", "iss", "aud", "exp", "iat", "email", "name"]
+
+    Jwk:
+      type: object
+      required: [kty, n, e]
+      properties:
+        kty:
+          type: string
+          example: RSA
+        use:
+          type: string
+          example: sig
+        alg:
+          type: string
+          example: RS256
+        kid:
+          type: string
+          example: "example-key-id"
+        n:
+          type: string
+          description: Base64url-encoded modulus
+        e:
+          type: string
+          description: Base64url-encoded exponent
+
+    Jwks:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/Jwk"
