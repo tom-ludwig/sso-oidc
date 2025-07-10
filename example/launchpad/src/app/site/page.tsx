@@ -54,7 +54,7 @@ export default function Site() {
                                     <CardDescription>Write down your todos!</CardDescription>
                                 </CardContent>
                                 <CardFooter>
-                                    <Avatar>
+                                    <Avatar className="w-12 h-12">
                                         <AvatarImage
                                             src="https://icons.veryicon.com/png/o/business/vscode-program-item-icon/todo-2.png"/>
                                         <AvatarFallback>APP</AvatarFallback>
@@ -69,7 +69,7 @@ export default function Site() {
                                     <CardDescription>Play your favorite game - Snake!</CardDescription>
                                 </CardContent>
                                 <CardFooter>
-                                    <Avatar>
+                                    <Avatar className="w-12 h-12">
                                         <AvatarImage src="https://images.icon-icons.com/348/PNG/512/Snake_35967.png"/>
                                         <AvatarFallback>APP</AvatarFallback>
                                     </Avatar>

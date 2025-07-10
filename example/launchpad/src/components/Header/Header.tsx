@@ -20,7 +20,7 @@ interface HeaderProps {
 
 export function Header({authenticated, userInfo, onLogin, onLogout}: Readonly<HeaderProps>) {
     const onSignUp = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_OAUTH_SERVER_FRONTEND_URL}/register`;
+        window.location.href = `${process.env.NEXT_PUBLIC_OAUTH_SERVER_FRONTEND_URL}/signup`;
     };
 
     return (
