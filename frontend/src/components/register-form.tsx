@@ -42,17 +42,27 @@ export function RegisterForm({
     let username = surname + " " + name;
 
     try {
-      const response = await axios.post(apiAddress, {
+      let response = await axios.post(apiAddress, {
         tenant_id: "550e8400-e29b-41d4-a716-446655440003",
         username,
         email,
         password,
       });
-            if (response.status == 201) {
-                axios.get("http://localhost:8080/oauth/authorize", {
-                    withCredentials: true,
-                });
-            }
+      if (response.status !== 201) {
+        return;
+      }
+
+      response = await axios.get("http://localhost:8080/oauth/login", {
+        withCredentials: true,
+      });
+
+      if (response.status !== 200) {
+        return;
+      }
+
+      axios.get("http://localhost:8080/oauth/authorize", {
+        withCredentials: true,
+      });
     } catch (err: any) {
       const msg =
         err.response?.data?.message || err.message || "Registration failed";
@@ -64,7 +74,7 @@ export function RegisterForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="flex flex-wrap items-center">
-          <Link to="/">
+          <Link to="/login">
             <ButtonIcon />
           </Link>
           <CardTitle>Register for an account</CardTitle>
