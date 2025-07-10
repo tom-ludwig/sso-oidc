@@ -116,7 +116,7 @@ async fn setup_router(
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
-        .allow_methods(vec![Method::GET, Method::POST]) // Specify methods needed
+        .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS]) // Specify methods needed
         .allow_headers(vec![
             HeaderName::from_static("content-type"),
             HeaderName::from_static("authorization"),
