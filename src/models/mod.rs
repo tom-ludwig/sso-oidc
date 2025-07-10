@@ -7,3 +7,5 @@ pub mod services_config;
 pub mod session;
 pub mod token_request;
 pub mod token_response;
+pub mod oidc_discovery_document;
+

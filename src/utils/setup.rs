@@ -12,10 +12,13 @@ use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenI
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
 use http::HeaderValue;
+use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
+
+use super::jwks_utils::generate_jwk_set_from_cert;
 
 pub async fn setup_server() -> Result<(), anyhow::Error> {
     let (sqlx_pool, redis_pool) = setup_databases()
@@ -23,7 +26,7 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .expect("Failed to setup database and Redis pools");
 
     let token_issuer = Arc::new(
-        TokenIssuer::from_pem_file("/keys/private.pem", "https://sso-oidc.com")
+        TokenIssuer::from_pem_file("keys/private.pem", "https://sso-oidc.com")
             .expect("Failed to load Certificates for Token Issuer"),
     );
 
@@ -36,21 +39,36 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
 
     // TODO: Change audience to be custom for each check
     let _token_verifier = Arc::new(
-        TokenVerifier::from_pem_file("/keys/public.pem", "https://sso-oidc.com", "aud")
+        TokenVerifier::from_pem_file("keys/public.pem", "https://sso-oidc.com", "aud")
             .expect("Failed to load Certificates for Token Verifier"),
     );
 
-    let (main_router, addr) = setup_router(services, token_issuer)
+    let jwks = setup_jwks().expect("Failed to create JSON Web Key Set");
+
+    let (listener, addr) = setup_router(services, token_issuer, jwks)
         .await
         .expect("Failed to setup router");
 
     println!("Server running on: {addr}");
     axum_server::bind(addr)
-        .serve(main_router.into_make_service())
+        .serve(listener.into_make_service())
         .await
         .unwrap();
 
     Ok(())
+}
+
+fn setup_jwks() -> Result<serde_json::Value, anyhow::Error> {
+    match generate_jwk_set_from_cert("keys/public.pem") {
+        Ok(jwk_set) => {
+            return Ok(jwk_set);
+            // println!("JWK Set: {}", jwk_set);
+        }
+        Err(e) => {
+            return Err(e);
+            // eprintln!("Error generating JWK Set: {}", e);
+        }
+    }
 }
 
 async fn setup_databases()
@@ -91,13 +109,14 @@ fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, Appli
 async fn setup_router(
     services: Arc<ServicesConfig>,
     token_issuer: Arc<TokenIssuer>,
+    jwks: Value,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let main_router = setup_routes(services, token_issuer).layer(cors);
+    let main_router = setup_routes(services, token_issuer, jwks).layer(cors);
 
     let port = 8080;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
