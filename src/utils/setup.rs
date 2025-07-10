@@ -11,9 +11,12 @@ use crate::utils::token_verifier::TokenVerifier;
 use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
+use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::sync::Arc;
 use tokio::net::TcpListener;
+
+use super::jwks_utils::generate_jwk_set_from_cert;
 
 pub async fn setup_server() -> Result<(), anyhow::Error> {
     let (sqlx_pool, redis_pool) = setup_databases()
@@ -21,7 +24,7 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .expect("Failed to setup database and Redis pools");
 
     let token_issuer = Arc::new(
-        TokenIssuer::from_pem_file("/keys/private.pem", "https://sso-oidc.com")
+        TokenIssuer::from_pem_file("keys/private.pem", "https://sso-oidc.com")
             .expect("Failed to load Certificates for Token Issuer"),
     );
 
@@ -34,11 +37,13 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
 
     // TODO: Change audience to be custom for each check
     let _token_verifier = Arc::new(
-        TokenVerifier::from_pem_file("/keys/public.pem", "https://sso-oidc.com", "aud")
+        TokenVerifier::from_pem_file("keys/public.pem", "https://sso-oidc.com", "aud")
             .expect("Failed to load Certificates for Token Verifier"),
     );
 
-    let (listener, main_router) = setup_router(services, token_issuer)
+    let jwks = setup_jwks().expect("Failed to create JSON Web Key Set");
+
+    let (listener, main_router) = setup_router(services, token_issuer, jwks)
         .await
         .expect("Failed to setup router");
 
@@ -48,6 +53,19 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
         .expect("Server failed to start");
 
     Ok(())
+}
+
+fn setup_jwks() -> Result<serde_json::Value, anyhow::Error> {
+    match generate_jwk_set_from_cert("keys/public.pem") {
+        Ok(jwk_set) => {
+            return Ok(jwk_set);
+            // println!("JWK Set: {}", jwk_set);
+        }
+        Err(e) => {
+            return Err(e);
+            // eprintln!("Error generating JWK Set: {}", e);
+        }
+    }
 }
 
 async fn setup_databases()
@@ -88,8 +106,9 @@ fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, Appli
 async fn setup_router(
     services: Arc<ServicesConfig>,
     token_issuer: Arc<TokenIssuer>,
+    jwks: Value,
 ) -> Result<(TcpListener, Router), anyhow::Error> {
-    let main_router = setup_routes(services, token_issuer);
+    let main_router = setup_routes(services, token_issuer, jwks);
 
     let port = 8080;
     let address = format!("0.0.0.0:{port}");
