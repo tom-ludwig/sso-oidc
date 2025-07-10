@@ -8,12 +8,14 @@ export interface TokenResponse {
 }
 
 export interface UserInfo {
-  name?: string;
-  email?: string;
-  given_name?: string;
-  family_name?: string;
-  preferred_username?: string;
-  sub?: string;
+  aud?: string;           // Audience (client ID)
+  email?: string;         // User email
+  exp?: number;          // Expiration time (Unix timestamp)
+  iat?: number;          // Issued at time (Unix timestamp)
+  iss?: string;          // Issuer
+  name?: string;         // Full display name
+  nonce?: string | null; // Nonce for OIDC flow
+  sub?: string;          // Subject (user identifier)
 }
 
 export interface AuthState {
@@ -151,13 +153,15 @@ export function decodeIdToken(idToken: string): UserInfo {
     
     console.log('Decoded ID token claims:', claims);
     
-    // Extract user information from standard OIDC claims
+    // Extract user information from the actual token claims
     return {
-      name: claims.name,
+      aud: claims.aud,
       email: claims.email,
-      given_name: claims.given_name,
-      family_name: claims.family_name,
-      preferred_username: claims.preferred_username,
+      exp: claims.exp,
+      iat: claims.iat,
+      iss: claims.iss,
+      name: claims.name,
+      nonce: claims.nonce,
       sub: claims.sub,
     };
   } catch (error) {

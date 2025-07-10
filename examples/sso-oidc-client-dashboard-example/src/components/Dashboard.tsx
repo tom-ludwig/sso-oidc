@@ -187,18 +187,13 @@ function DashboardContent({ authState }: { authState: AuthState }) {
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                 <span className="text-primary-foreground text-sm font-medium">
                   {authState.userInfo?.name?.charAt(0) || 
-                   authState.userInfo?.given_name?.charAt(0) || 
                    authState.userInfo?.email?.charAt(0) || 
                    '?'}
                 </span>
               </div>
               <div className="hidden md:block">
                 <p className="text-sm font-medium">
-                  {authState.userInfo?.name || 
-                   (authState.userInfo?.given_name && authState.userInfo?.family_name 
-                     ? `${authState.userInfo.given_name} ${authState.userInfo.family_name}`
-                     : authState.userInfo?.preferred_username || 
-                       'Unknown User')}
+                  {authState.userInfo?.name || 'Unknown User'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {authState.userInfo?.email || 'No email provided'}
@@ -543,28 +538,34 @@ function DashboardContent({ authState }: { authState: AuthState }) {
                       <span>{authState.userInfo.email}</span>
                     </div>
                   )}
-                  {authState.userInfo.given_name && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Given Name:</span>
-                      <span>{authState.userInfo.given_name}</span>
-                    </div>
-                  )}
-                  {authState.userInfo.family_name && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Family Name:</span>
-                      <span>{authState.userInfo.family_name}</span>
-                    </div>
-                  )}
-                  {authState.userInfo.preferred_username && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Username:</span>
-                      <span>{authState.userInfo.preferred_username}</span>
-                    </div>
-                  )}
                   {authState.userInfo.sub && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subject ID:</span>
                       <span className="font-mono">{authState.userInfo.sub}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.iss && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Issuer:</span>
+                      <span className="font-mono">{authState.userInfo.iss}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.aud && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Audience:</span>
+                      <span className="font-mono">{authState.userInfo.aud}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.exp && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Expires:</span>
+                      <span>{new Date(authState.userInfo.exp * 1000).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.iat && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Issued At:</span>
+                      <span>{new Date(authState.userInfo.iat * 1000).toLocaleString()}</span>
                     </div>
                   )}
                 </div>
