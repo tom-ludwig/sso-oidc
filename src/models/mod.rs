@@ -1,11 +1,11 @@
+pub mod application_model;
 pub mod auth_code_data;
 pub mod authorize_request;
 pub mod claims;
-pub mod login;
 pub mod config;
+pub mod login;
+pub mod oidc_discovery_document;
 pub mod services_config;
 pub mod session;
 pub mod token_request;
 pub mod token_response;
-pub mod oidc_discovery_document;
-

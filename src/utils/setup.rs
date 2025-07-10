@@ -1,4 +1,5 @@
 use crate::routes::routes::setup_routes;
+use crate::services::application_service::ApplicationClientService;
 use crate::services::authorize_code_service::AuthorizeCodeService;
 use crate::services::config::application_service::ApplicationService;
 use crate::services::config::tenant_service::TenantService;
@@ -91,11 +92,13 @@ fn setup_services(
     let user_service = UserService::new(sqlx_pool.clone());
     let auth_code_service = AuthorizeCodeService::new(sqlx_pool.clone(), redis_pool.clone());
     let session_service = SessionService::new(sqlx_pool.clone(), redis_pool);
+    let application_service = ApplicationClientService::new(sqlx_pool.clone());
 
     Arc::new(ServicesConfig {
         user_service,
         auth_code_service,
         session_service,
+        application_service,
     })
 }
 

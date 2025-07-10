@@ -2,7 +2,7 @@ use sqlx::{Pool, Postgres};
 
 use crate::{
     models::{
-        login::{LoginRequest, User},
+        login::{LoginRequest, User, UserIDSQL, UserInformation},
         session::SessionData,
     },
     utils::password_hash_utils::verify_password,
@@ -17,13 +17,16 @@ impl UserService {
         Self { db_pool }
     }
 
-    pub fn get_user(&self, email: &String) -> SessionData {
-        // TODO: some sql magic
-        SessionData {
-            user_id: "Tom".to_string(),
-        }
-    }
+    pub async fn get_user_id_from_email(
+        &self,
+        email: &String,
+    ) -> Result<SessionData, anyhow::Error> {
+        let result = sqlx::query_as!(UserIDSQL, "SELECT id FROM Users where email = $1", email)
+            .fetch_one(&self.db_pool)
+            .await?;
 
+        Ok(SessionData { user_id: result.id })
+    }
     /// Authorizes the user with a cookie if the credentials passed are valid
     pub async fn auth_user(&self, login_request: &LoginRequest) -> Option<bool> {
         let result = sqlx::query_as!(
@@ -43,5 +46,22 @@ impl UserService {
             Ok(is_authenticated) => Some(is_authenticated),
             Err(_) => return None,
         }
+    }
+
+    pub async fn get_user_information(
+        &self,
+        user_id: &str,
+    ) -> Result<UserInformation, anyhow::Error> {
+        let user_uuid = uuid::Uuid::parse_str(user_id)?;
+
+        let result = sqlx::query_as!(
+            UserInformation,
+            "SELECT username, email, is_active FROM Users where id = $1",
+            user_uuid
+        )
+        .fetch_one(&self.db_pool)
+        .await;
+
+        Ok(result?)
     }
 }
