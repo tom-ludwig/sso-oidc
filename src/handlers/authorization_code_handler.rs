@@ -25,9 +25,27 @@ pub async fn authorize(
     }
 
     // Validate client_id and redirect_uri
-    // TODO: (this should be looked up from DB)
-    if params.client_id != "my-client-id"
-        || params.redirect_uri != "https://my-frontend.com/callback"
+    let application_info = match services
+        .application_service
+        .get_client_information(&params.client_id)
+        .await
+    {
+        Ok(application_info) => application_info,
+        Err(_) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "An error occurred during client id checking".to_string(),
+            )
+                .into_response();
+        }
+    };
+
+    // if params.redirect_uri != "https://my-frontend.com/callback" {
+
+    if !application_info
+        .redirect_uris
+        .iter()
+        .any(|s| s == &params.redirect_uri)
     {
         return (
             StatusCode::BAD_REQUEST,

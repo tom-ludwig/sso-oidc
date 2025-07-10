@@ -1,3 +1,4 @@
+pub mod application_service;
 pub mod authorize_code_service;
 pub mod config;
 pub mod session_service;
