@@ -186,13 +186,22 @@ function DashboardContent({ authState }: { authState: AuthState }) {
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                 <span className="text-primary-foreground text-sm font-medium">
-                  {faker.person.firstName().charAt(0)}
+                  {authState.userInfo?.name?.charAt(0) || 
+                   authState.userInfo?.given_name?.charAt(0) || 
+                   authState.userInfo?.email?.charAt(0) || 
+                   '?'}
                 </span>
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-medium">{faker.person.fullName()}</p>
+                <p className="text-sm font-medium">
+                  {authState.userInfo?.name || 
+                   (authState.userInfo?.given_name && authState.userInfo?.family_name 
+                     ? `${authState.userInfo.given_name} ${authState.userInfo.family_name}`
+                     : authState.userInfo?.preferred_username || 
+                       'Unknown User')}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {faker.internet.email()}
+                  {authState.userInfo?.email || 'No email provided'}
                 </p>
               </div>
             </div>
@@ -516,6 +525,51 @@ function DashboardContent({ authState }: { authState: AuthState }) {
                 </div>
               </div>
             </div>
+            
+            {/* User Information from ID Token */}
+            {authState.userInfo && (
+              <div className="space-y-2 border-t pt-4">
+                <div className="text-sm font-medium">Decoded User Information</div>
+                <div className="grid gap-2 text-xs">
+                  {authState.userInfo.name && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Name:</span>
+                      <span>{authState.userInfo.name}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.email && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Email:</span>
+                      <span>{authState.userInfo.email}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.given_name && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Given Name:</span>
+                      <span>{authState.userInfo.given_name}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.family_name && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Family Name:</span>
+                      <span>{authState.userInfo.family_name}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.preferred_username && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Username:</span>
+                      <span>{authState.userInfo.preferred_username}</span>
+                    </div>
+                  )}
+                  {authState.userInfo.sub && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subject ID:</span>
+                      <span className="font-mono">{authState.userInfo.sub}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -555,6 +609,7 @@ export default function Dashboard() {
           isAuthenticated: false,
           accessToken: null,
           idToken: null,
+          userInfo: undefined,
         });
       } finally {
         setIsLoading(false);

@@ -7,10 +7,20 @@ export interface TokenResponse {
   expires_in: number;
 }
 
+export interface UserInfo {
+  name?: string;
+  email?: string;
+  given_name?: string;
+  family_name?: string;
+  preferred_username?: string;
+  sub?: string;
+}
+
 export interface AuthState {
   isAuthenticated: boolean;
   accessToken: string | null;
   idToken: string | null;
+  userInfo?: UserInfo;
 }
 
 // Storage keys
@@ -104,6 +114,58 @@ export function clearUrlParameters(): void {
   window.history.replaceState({}, document.title, url.toString());
 }
 
+// JWT decoding utilities
+function base64UrlDecode(str: string): string {
+  // Replace URL-safe characters and add padding if needed
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) {
+    base64 += '=';
+  }
+  
+  try {
+    // Decode base64 and handle UTF-8
+    return decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+  } catch (error) {
+    console.error('Failed to decode base64:', error);
+    throw new Error('Invalid base64 encoding');
+  }
+}
+
+export function decodeIdToken(idToken: string): UserInfo {
+  try {
+    // JWT has three parts: header.payload.signature
+    const parts = idToken.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT format');
+    }
+    
+    // Decode the payload (second part)
+    const payload = parts[1];
+    const decodedPayload = base64UrlDecode(payload);
+    const claims = JSON.parse(decodedPayload);
+    
+    console.log('Decoded ID token claims:', claims);
+    
+    // Extract user information from standard OIDC claims
+    return {
+      name: claims.name,
+      email: claims.email,
+      given_name: claims.given_name,
+      family_name: claims.family_name,
+      preferred_username: claims.preferred_username,
+      sub: claims.sub,
+    };
+  } catch (error) {
+    console.error('Failed to decode ID token:', error);
+    return {};
+  }
+}
+
 // OAuth flow functions
 export async function exchangeCodeForTokens(authCode: string): Promise<TokenResponse> {
   // Prepare form data for the token request
@@ -182,10 +244,12 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
   // First, check if we already have valid tokens
   if (isAuthenticated()) {
     const { accessToken, idToken } = getStoredTokens();
+    const userInfo = idToken ? decodeIdToken(idToken) : undefined;
     return {
       isAuthenticated: true,
       accessToken,
       idToken,
+      userInfo,
     };
   }
 
@@ -211,10 +275,12 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
         clearUrlParameters();
         // clearOAuthState(); // Commented out since CSRF protection is disabled
         
+        const userInfo = decodeIdToken(tokenResponse.id_token);
         return {
           isAuthenticated: true,
           accessToken: tokenResponse.access_token,
           idToken: tokenResponse.id_token,
+          userInfo,
         };
       } catch (error) {
         console.error('Token exchange from URL code failed:', error);
@@ -238,15 +304,17 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
   if (authCode) {
     try {
       console.log('Found auth code from session, exchanging for tokens...');
-      // Exchange auth code for tokens
-      const tokenResponse = await exchangeCodeForTokens(authCode);
-      storeTokens(tokenResponse);
-      
-      return {
-        isAuthenticated: true,
-        accessToken: tokenResponse.access_token,
-        idToken: tokenResponse.id_token,
-      };
+              // Exchange auth code for tokens
+        const tokenResponse = await exchangeCodeForTokens(authCode);
+        storeTokens(tokenResponse);
+        
+        const userInfo = decodeIdToken(tokenResponse.id_token);
+        return {
+          isAuthenticated: true,
+          accessToken: tokenResponse.access_token,
+          idToken: tokenResponse.id_token,
+          userInfo,
+        };
     } catch (error) {
       console.error('Token exchange from session failed:', error);
       clearTokens();
@@ -258,6 +326,7 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
     isAuthenticated: false,
     accessToken: null,
     idToken: null,
+    userInfo: undefined,
   };
 }
 
