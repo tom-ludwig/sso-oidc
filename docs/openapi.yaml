@@ -7,9 +7,9 @@ paths:
     get:
       summary: Authorization endpoint supporting OAuth2 Authorization Code flow
       description: |
-        Validates `response_type`, `client_id`, and `redirect_uri`.  
-        Requires a valid user session cookie `session_id`.  
-        If no session, redirects to login UI.  
+        Validates `response_type`, `client_id`, and `redirect_uri`.
+        Requires a valid user session cookie `session_id`.
+        If no session, redirects to login UI.
         If valid session, generates an authorization code and redirects to `redirect_uri` with the code.
       parameters:
         - name: response_type
@@ -138,6 +138,37 @@ paths:
             text/plain:
               schema:
                 type: string
+  /oauth/login:
+    post:
+      summary: Authenticate user and set session cookie
+      description: >
+        Authenticates the user with email and password. On success, sets a `session_id` cookie
+        and redirects the user to the frontend application. On failure, returns 401 Unauthorized.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '302':
+          description: Redirect to frontend with session cookie set
+          headers:
+            Set-Cookie:
+              description: HTTP session cookie containing the session ID
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Redirecting to http://localhost:5173/app
+        '401':
+          description: Invalid credentials
+        '500':
+          description: Internal server error while creating session
+      tags:
+        - Authentication
 components:
   securitySchemes:
     cookieAuth:
@@ -165,3 +196,15 @@ components:
           type: string
           nullable: true
           description: Reserved for future use (not currently implemented).
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
