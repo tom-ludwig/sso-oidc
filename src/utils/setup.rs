@@ -17,7 +17,7 @@ use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 use super::jwks_utils::generate_jwk_set_from_cert;
 
@@ -90,8 +90,8 @@ fn setup_services(
     redis_pool: RedisPool<RedisConnectionManager>,
 ) -> Arc<ServicesConfig> {
     let user_service = UserService::new(sqlx_pool.clone());
-    let auth_code_service = AuthorizeCodeService::new(sqlx_pool.clone(), redis_pool.clone());
-    let session_service = SessionService::new(sqlx_pool.clone(), redis_pool);
+    let auth_code_service = AuthorizeCodeService::new(redis_pool.clone());
+    let session_service = SessionService::new(redis_pool);
     let application_service = ApplicationClientService::new(sqlx_pool.clone());
 
     Arc::new(ServicesConfig {

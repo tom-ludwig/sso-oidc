@@ -3,16 +3,15 @@ use crate::models::user_models::UserInformation;
 use crate::utils;
 use crate::{
     models::{
-        login::{LoginRequest, User},
+        login::{LoginRequest, UserPasswordHashSQL},
         session::SessionData,
         user_models::CreateUserRequest,
     },
     utils::password_hash_utils::verify_password,
 };
-use anyhow::{Context, Result};
+use anyhow::Result;
 use sqlx::query;
-use sqlx::query_scalar;
-use sqlx::{Error as SqlxError, postgres::PgDatabaseError};
+use sqlx::{Error as SqlxError};
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
@@ -24,30 +23,14 @@ impl UserService {
     pub fn new(db_pool: Pool<Postgres>) -> Self {
         Self { db_pool }
     }
-
-    pub async fn create_user(&self, new_user: CreateUserRequest) -> Result<(), anyhow::Error> {
+    pub async fn create_user(&self, new_user: &CreateUserRequest) -> Result<(), anyhow::Error> {
         let tenant_uuid = Uuid::parse_str(&new_user.tenant_id)
             .map_err(|e| anyhow::anyhow!("Failed to parse tenant UUID: {}", e))?;
 
         let hashed_password = utils::password_hash_utils::hash_password(&new_user.password)
             .map_err(|e| anyhow::anyhow!("Password hashing failed: {}", e))?;
 
-        // let exists: Option<Uuid> = query_scalar!(
-        //     r#"
-        //     SELECT id FROM Users WHERE email = $1
-        //     "#,
-        //     new_user.email
-        // )
-        // .fetch_optional(&self.db_pool)
-        // .await
-        // .context("Failed to check if email exists")?;
-
-        // if exists.is_some() {
-        //     return Err(anyhow::anyhow!("A user with this email already exists"));
-        // }
-
         let user_uuid = Uuid::new_v4();
-        //            // RETURNING id
 
         let result = query!(
             r#"
@@ -63,7 +46,6 @@ impl UserService {
         )
         .execute(&self.db_pool)
         .await;
-        // .context("Failed to insert new user")?;
         println!("{:?}", result);
 
         if let Ok(pg_result) = result {
@@ -107,7 +89,7 @@ impl UserService {
     /// Authorizes the user with a cookie if the credentials passed are valid
     pub async fn auth_user(&self, login_request: &LoginRequest) -> Option<bool> {
         let result = sqlx::query_as!(
-            User,
+            UserPasswordHashSQL,
             "SELECT password_hash FROM Users WHERE email = $1",
             login_request.email
         )
