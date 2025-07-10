@@ -127,6 +127,7 @@ async fn setup_router(
 
     let port = 8080;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    // let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     Ok((main_router, addr))
 }
@@ -139,16 +140,20 @@ async fn setup_configurations(
     let applications_config = load_applications_config("config/applications.yaml").await?;
 
     for tenant in tenants_config.tenants {
-        let tenant_id = tenant.id.clone();
-        if let Err(_) = tenant_service.create_tenant(tenant).await {
-            println!("Tenant {} already exists. Skipping...", tenant_id);
+        let tenant_id = tenant.id;
+        if tenant_service.create_tenant(tenant).await.is_err() {
+            println!("Tenant {tenant_id} already exists. Skipping...");
         }
     }
 
     for application in applications_config.applications {
-        let application_id = application.id.clone();
-        if let Err(_) = application_service.create_application(application).await {
-            println!("Application {} already exists. Skipping...", application_id);
+        let application_id = application.id;
+        if application_service
+            .create_application(application)
+            .await
+            .is_err()
+        {
+            println!("Application {application_id} already exists. Skipping...");
         }
     }
 

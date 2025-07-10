@@ -1,5 +1,4 @@
 import {LoginForm} from "@/components/login-form";
-import axios from "axios";
 import { RegisterForm } from "@/components/register-form";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -9,7 +8,8 @@ export default function App() {
       <div className="w-full max-w-sm">
         <Router>
           <Routes>
-            <Route path="/" element={<LoginForm />} />
+            <Route path="/" element={<h1>Hello</h1>} />
+            <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<RegisterForm />} />
           </Routes>
         </Router>

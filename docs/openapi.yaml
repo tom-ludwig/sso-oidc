@@ -7,9 +7,9 @@ paths:
     get:
       summary: Authorization endpoint supporting OAuth2 Authorization Code flow
       description: |
-        Validates `response_type`, `client_id`, and `redirect_uri`.  
-        Requires a valid user session cookie `session_id`.  
-        If no session, redirects to login UI.  
+        Validates `response_type`, `client_id`, and `redirect_uri`.
+        Requires a valid user session cookie `session_id`.
+        If no session, redirects to login UI.
         If valid session, generates an authorization code and redirects to `redirect_uri` with the code.
       parameters:
         - name: response_type
@@ -138,6 +138,31 @@ paths:
             text/plain:
               schema:
                 type: string
+  /oauth/login:
+    post:
+      summary: Authenticate user and set session cookie
+      description: >
+        Authenticates a user using email and password.
+        On success, returns user info in the response body and sets a `session_id` cookie.
+      $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: User successfully authenticated
+          headers:
+            Set-Cookie:
+              description: HTTP cookie containing the session ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionData'
+        '401':
+          description: Invalid credentials
+        '500':
+          description: Internal server error while creating session
+      tags:
+        - Authentication
   /.well-known/openid-configuration:
     get:
       summary: OpenID Connect Discovery Document
@@ -173,7 +198,7 @@ paths:
             text/plain:
               schema:
                 type: string
-  /register:
+  /oauth/register:
     post:
       summary: Register a new user
       description: Creates a user with a username, email, password, and tenant ID.
@@ -231,6 +256,23 @@ components:
           type: string
           nullable: true
           description: Reserved for future use (not currently implemented).
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    SessionData:
+      type: object
+      properties:
+        user_id:
+          type: string
     OidcDiscoveryDocument:
       type: object
       required:

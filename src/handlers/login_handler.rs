@@ -1,11 +1,10 @@
 use crate::models::{login::LoginRequest, services_config::ServicesConfig};
 use axum::{
     Json,
-    http::{Response as HttpResponse, StatusCode},
+    http::{Response as HttpResponse, StatusCode, header::SET_COOKIE},
     response::IntoResponse,
 };
 use cookie::Cookie;
-use http::header::SET_COOKIE;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -42,11 +41,12 @@ pub async fn authenticate_user(
             return StatusCode::INTERNAL_SERVER_ERROR.into_response();
         }
 
-        let cookie = Cookie::build(("Session ID", &session_id))
+        let cookie = Cookie::build(("session_id", &session_id))
             .path("/")
             .max_age(cookie::time::Duration::seconds(ttl as i64))
             .http_only(true)
-            .secure(false);
+            .secure(true)
+            .same_site(cookie::SameSite::None);
 
         let json = match serde_json::to_string(&user) {
             Ok(json) => json,
