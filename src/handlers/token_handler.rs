@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use axum::{
-    Extension, Form, 
-    http::{header::SET_COOKIE, Response as HttpResponse, StatusCode}, 
-    response::IntoResponse
+    Extension, Form,
+    http::{Response as HttpResponse, StatusCode, header::SET_COOKIE},
+    response::IntoResponse,
 };
 use axum_macros::debug_handler;
 use cookie::Cookie;
@@ -120,10 +120,10 @@ pub async fn token(
 
     // Create HTTP-only cookie for refresh token
     let refresh_cookie = Cookie::build(("refresh_token", &refresh_token))
-        .path("/oauth/refresh")
+        .path("")
         .max_age(cookie::time::Duration::seconds(86400)) // 24 hours
         .http_only(true)
-        .secure(false)
+        .secure(true)
         .same_site(cookie::SameSite::Lax);
 
     // Create token response (without refresh_token in JSON)
@@ -146,8 +146,9 @@ pub async fn token(
                 .into_response();
         }
     };
-    
-    println!("refresh_cookie set: {}", refresh_cookie.to_string());
+
+    println!("Issuesing new refresh token");
+
     // Return response with both JSON body and refresh token cookie
     HttpResponse::builder()
         .status(StatusCode::OK)

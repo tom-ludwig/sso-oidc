@@ -168,6 +168,18 @@ function AuthenticationRequired() {
 }
 
 function DashboardContent({ authState }: { authState: AuthState }) {
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      setIsSigningOut(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header using shadcn/ui styling */}
@@ -200,8 +212,20 @@ function DashboardContent({ authState }: { authState: AuthState }) {
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              Sign Out
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+            >
+              {isSigningOut ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                  Signing Out...
+                </>
+              ) : (
+                "Sign Out"
+              )}
             </Button>
           </div>
         </div>

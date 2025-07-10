@@ -30,6 +30,7 @@ const ACCESS_TOKEN_KEY = 'access_token';
 const ID_TOKEN_KEY = 'id_token';
 const TOKEN_EXPIRY_KEY = 'token_expiry';
 const OAUTH_STATE_KEY = 'oauth_state';
+const LOGOUT_FLAG_KEY = 'just_logged_out';
 
 // Utility functions for cookie management
 export function getCookie(name: string): string | null {
@@ -78,6 +79,7 @@ export function clearTokens(): void {
   sessionStorage.removeItem(ID_TOKEN_KEY);
   sessionStorage.removeItem(TOKEN_EXPIRY_KEY);
   sessionStorage.removeItem(OAUTH_STATE_KEY);
+  sessionStorage.removeItem(LOGOUT_FLAG_KEY);
 }
 
 // OAuth state management for CSRF protection
@@ -246,6 +248,25 @@ function generateRandomState(): string {
 
 // Main authentication check function
 export async function checkAuthenticationStatus(): Promise<AuthState> {
+  // Check if user just logged out recently to prevent immediate re-authentication
+  if (typeof window !== 'undefined') {
+    const logoutTime = sessionStorage.getItem(LOGOUT_FLAG_KEY);
+    if (logoutTime) {
+      const timeSinceLogout = Date.now() - parseInt(logoutTime);
+      if (timeSinceLogout < 5000) { // Skip re-auth for 5 seconds after logout
+        return {
+          isAuthenticated: false,
+          accessToken: null,
+          idToken: null,
+          userInfo: undefined,
+        };
+      } else {
+        // Clear the logout flag after the timeout period
+        sessionStorage.removeItem(LOGOUT_FLAG_KEY);
+      }
+    }
+  }
+
   // First, check if we already have valid tokens
   if (isAuthenticated()) {
     const { accessToken, idToken } = getStoredTokens();
@@ -336,9 +357,40 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
 }
 
 // Sign out function
-export function signOut(): void {
+export async function signOut(): Promise<void> {
+  try {
+    // Call the server logout endpoint to clean up session and cookies
+    const response = await fetch(`${AUTH_CONFIG.authServerUrl}${AUTH_CONFIG.endpoints.logout}`, {
+      method: 'POST',
+      credentials: 'include', // Important: include cookies for logout
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn('Logout endpoint returned error, but continuing with local cleanup');
+    }
+  } catch (error) {
+    console.error('Failed to call logout endpoint:', error);
+    // Continue with local cleanup even if server call fails
+  }
+
+  // Set logout flag to prevent immediate re-authentication
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(LOGOUT_FLAG_KEY, Date.now().toString());
+  }
+  
+  // Clear local storage regardless of server response
   clearTokens();
-  // Clear session cookie
-  document.cookie = 'session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  
+  // Manually clear cookies on client side as additional cleanup
+  document.cookie = 'session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+  document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/oauth/refresh; SameSite=Lax';
+  
+  // Add a small delay to ensure cookie clearing is processed
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  // Redirect to home or reload page to ensure clean state
   window.location.reload();
 } 

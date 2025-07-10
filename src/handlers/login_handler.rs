@@ -46,13 +46,14 @@ pub async fn authenticate_user(
             .max_age(cookie::time::Duration::seconds(ttl as i64))
             .http_only(true)
             .secure(true)
-            .same_site(cookie::SameSite::None);
+            .same_site(cookie::SameSite::Lax);
 
         let json = match serde_json::to_string(&user) {
             Ok(json) => json,
             Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
         };
 
+        println!("Issuing new session id token");
         HttpResponse::builder()
             .status(StatusCode::OK)
             .header(SET_COOKIE, cookie.to_string())

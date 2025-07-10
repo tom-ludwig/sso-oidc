@@ -52,4 +52,14 @@ impl SessionService {
 
         Ok(())
     }
+
+    /// Delete a session from redis
+    pub async fn delete_session(&self, session_id: &str) -> Result<(), anyhow::Error> {
+        let mut conn = self.redis_pool.get().await?;
+
+        let key = format!("sess:{}", session_id);
+        let _: () = conn.del(key).await?;
+
+        Ok(())
+    }
 }

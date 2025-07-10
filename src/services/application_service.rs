@@ -22,7 +22,6 @@ impl ApplicationClientService {
         .fetch_one(&self.db_pool)
         .await;
 
-        println!("{:?}", result);
         return Ok(result?);
     }
 }

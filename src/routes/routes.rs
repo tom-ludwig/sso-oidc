@@ -10,8 +10,8 @@ use crate::{
 };
 
 use super::{
-    auth::auth_routes, authorize_routes::authorize_routes, token_routes::token_routes,
-    user_routes::user_routes,
+    auth::auth_routes, authorize_routes::authorize_routes, logout_routes::logout_routes,
+    token_routes::token_routes, user_routes::user_routes,
 };
 
 pub fn setup_routes(
@@ -22,7 +22,8 @@ pub fn setup_routes(
     let authorize_routes = authorize_routes(services.clone());
     let token_routes = token_routes(services.clone(), token_issuer);
     let auth_routes = auth_routes(services.clone());
-    let user_routes = user_routes(services);
+    let user_routes = user_routes(services.clone());
+    let logout_routes = logout_routes(services);
 
     let sharred_jwks = Arc::new(jwks);
 
@@ -34,4 +35,5 @@ pub fn setup_routes(
         .nest("/oauth", token_routes)
         .nest("/oauth", auth_routes)
         .nest("/oauth", user_routes)
+        .nest("/oauth", logout_routes)
 }
