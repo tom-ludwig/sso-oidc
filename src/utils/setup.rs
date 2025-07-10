@@ -12,7 +12,7 @@ use crate::utils::token_verifier::TokenVerifier;
 use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
-use http::HeaderValue;
+use http::{HeaderName, HeaderValue, Method};
 use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
@@ -116,8 +116,12 @@ async fn setup_router(
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
-        .allow_methods(Any)
-        .allow_headers(Any);
+        .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS]) // Specify methods needed
+        .allow_headers(vec![
+            HeaderName::from_static("content-type"),
+            HeaderName::from_static("authorization"),
+        ]) // Specify common headers
+        .allow_credentials(true);
 
     let main_router = setup_routes(services, token_issuer, jwks).layer(cors);
 
