@@ -186,6 +186,7 @@ export async function exchangeCodeForTokens(authCode: string): Promise<TokenResp
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
+    credentials: 'include',
     body: formData.toString(),
   });
 
