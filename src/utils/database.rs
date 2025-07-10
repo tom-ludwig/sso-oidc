@@ -13,10 +13,7 @@ pub async fn create_postgres_pool() -> Result<Pool<Postgres>, sqlx::Error> {
     let password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD must be set");
     let dbname = env::var("POSTGRES_DB").expect("POSTGRES_DB must be set");
 
-    let database_url = format!(
-        "postgres://{}:{}@{}:{}/{}",
-        user, password, host, port, dbname
-    );
+    let database_url = format!("postgres://{user}:{password}@{host}:{port}/{dbname}");
 
     // Configure the connection pool
     let pool = PgPoolOptions::new()

@@ -11,10 +11,12 @@ use crate::utils::token_verifier::TokenVerifier;
 use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
+use http::HeaderValue;
 use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
+use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::TcpListener;
+use tower_http::cors::{Any, CorsLayer};
 
 use super::jwks_utils::generate_jwk_set_from_cert;
 
@@ -43,14 +45,15 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
 
     let jwks = setup_jwks().expect("Failed to create JSON Web Key Set");
 
-    let (listener, main_router) = setup_router(services, token_issuer, jwks)
+    let (listener, addr) = setup_router(services, token_issuer, jwks)
         .await
         .expect("Failed to setup router");
 
-    println!("Server running on: {}", listener.local_addr()?);
-    axum::serve(listener, main_router)
+    println!("Server running on: {addr}");
+    axum_server::bind(addr)
+        .serve(listener.into_make_service())
         .await
-        .expect("Server failed to start");
+        .unwrap();
 
     Ok(())
 }
@@ -107,14 +110,18 @@ async fn setup_router(
     services: Arc<ServicesConfig>,
     token_issuer: Arc<TokenIssuer>,
     jwks: Value,
-) -> Result<(TcpListener, Router), anyhow::Error> {
-    let main_router = setup_routes(services, token_issuer, jwks);
+) -> Result<(Router, SocketAddr), anyhow::Error> {
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_methods(Any)
+        .allow_headers(Any);
+
+    let main_router = setup_routes(services, token_issuer, jwks).layer(cors);
 
     let port = 8080;
-    let address = format!("0.0.0.0:{port}");
-    let listener = TcpListener::bind(&address).await?;
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
 
-    Ok((listener, main_router))
+    Ok((main_router, addr))
 }
 
 async fn setup_configurations(

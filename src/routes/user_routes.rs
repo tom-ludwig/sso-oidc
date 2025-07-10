@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{Extension, Router, routing::get};
+use axum::{Extension, Router};
 
 use crate::models::services_config::ServicesConfig;
 
