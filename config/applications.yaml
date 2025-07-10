@@ -4,9 +4,10 @@ applications:
     name: "SAP Concur"
     client_id: "sap_concur_client_001"
     client_secret: "sap_concur_secret_2024"
-    uri: "https://www.concursolutions.com"
+    uri: "http://localhost:5555"
     redirect_uris:
       - "https://www.concursolutions.com/auth/callback"
+      - "http://localhost:5555/dashboard"
     post_logout_redirect_uris:
       - "https://www.concursolutions.com/logout"
 
@@ -31,3 +32,4 @@ applications:
       - "https://console.aws.amazon.com/auth/callback"
     post_logout_redirect_uris:
       - "https://console.aws.amazon.com/logout"
+

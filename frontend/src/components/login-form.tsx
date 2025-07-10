@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function LoginForm({
@@ -19,10 +19,37 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const apiAddress = "http://localhost:8080/oauth";
+  const [searchParams] = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const [oauthParams, setOauthParams] = useState({
+    client_id: "sap_concur_client_001", // default fallback
+    redirect_uri: "https://www.concursolutions.com/auth/callback", // default fallback
+    response_type: "code", // default
+    state: "", // optional
+    scope: "", // optional
+  });
+
+  useEffect(() => {
+    // Extract parameters from URL and update state
+    const urlClientId = searchParams.get("client_id");
+    const urlRedirectUri = searchParams.get("redirect_uri");
+    const urlResponseType = searchParams.get("response_type");
+    const urlState = searchParams.get("state");
+    const urlScope = searchParams.get("scope");
+
+    setOauthParams({
+      client_id: urlClientId || "sap_concur_client_001",
+      redirect_uri:
+        urlRedirectUri || "https://www.concursolutions.com/auth/callback",
+      response_type: urlResponseType || "code",
+      state: urlState || "",
+      scope: urlScope || "",
+    });
+  }, [searchParams]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -50,26 +77,60 @@ export function LoginForm({
                   },
                 );
                 console.log("Login success: ", response.data);
-                const authorize = async () => {
-                  const url = new URL("http://localhost:8080/oauth/authorize");
-                  url.searchParams.append("response_type", "code");
-                  url.searchParams.append("client_id", "my-client-id");
-                  url.searchParams.append(
-                    "redirect_uri",
-                    "http://localhost:5173/",
-                  );
-                  url.searchParams.append("origin", "http://localhost:5173/");
+                // <<<<<<< HEAD
 
-                  try {
-                    const response = await axios.get(url.toString(), {
-                      withCredentials: true,
-                    });
-                    console.log("Final response:", response);
-                  } catch (err) {
-                    console.error("Authorization fetch failed", err);
+                // if (response.status == 200) {
+                //   window.location.href =
+                //     `${apiAddress}/authorize?` +
+                //     new URLSearchParams({
+                //       response_type: "code",
+                //       client_id: "sap_concur_client_001",
+                //       redirect_uri:
+                //         "https://www.concursolutions.com/auth/callback",
+                //     }).toString();
+                // }
+
+                if (response.status === 200) {
+                  // Build OAuth authorization URL with the same parameters from the original request
+                  const authParams = new URLSearchParams({
+                    response_type: oauthParams.response_type,
+                    client_id: oauthParams.client_id,
+                    redirect_uri: oauthParams.redirect_uri,
+                  });
+
+                  // Add optional parameters if they exist
+                  if (oauthParams.state) {
+                    authParams.append("state", oauthParams.state);
                   }
-                };
-                authorize();
+                  if (oauthParams.scope) {
+                    authParams.append("scope", oauthParams.scope);
+                  }
+
+                  window.location.href = `${apiAddress}/authorize?${authParams.toString()}`;
+                }
+                // window.location.href = apiAddress + "/authorize";
+                // =======
+                //                 const authorize = async () => {
+                //                   const url = new URL("http://localhost:8080/oauth/authorize");
+                //                   url.searchParams.append("response_type", "code");
+                //                   url.searchParams.append("client_id", "my-client-id");
+                //                   url.searchParams.append(
+                //                     "redirect_uri",
+                //                     "http://localhost:5173/",
+                //                   );
+                //                   url.searchParams.append("origin", "http://localhost:5173/");
+                //
+                //                   try {
+                //                     const response = await axios.get(url.toString(), {
+                //                       withCredentials: true,
+                //                     });
+                //                     console.log("Final response:", response);
+                //                   } catch (err) {
+                //                     console.error("Authorization fetch failed", err);
+                //                   }
+                //                 };
+                //                 authorize();
+                // >>>>>>> origin/master
               } catch (err: any) {
                 const msg =
                   err.response?.data?.message || err.message || "Login failed";

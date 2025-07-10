@@ -32,6 +32,7 @@ pub async fn authorize(
     {
         Ok(application_info) => application_info,
         Err(_) => {
+            println!("Expected  but got: {:?}", &params.client_id);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "An error occurred during client id checking".to_string(),
@@ -84,7 +85,7 @@ pub async fn authorize(
         );
 
         let login_url = format!(
-            "http://myapp.local:5173/login?return_to={}",
+            "http://localhost:5173/login?return_to={}",
             urlencoding::encode(&return_to)
         );
         dbg!(Redirect::temporary(&login_url).into_response());

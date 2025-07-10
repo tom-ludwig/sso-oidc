@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO Users (id, tenant_id, username, email, password_hash)\n            VALUES ($1, $2, $3, $4, $5)\n            ON CONFLICT ON CONSTRAINT users_tenant_id_username_key DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b6bbfa6e813a33f509dacfa5cbc57b4f35f758ab87e2b0ca443ab338ab8b85c1"
+}

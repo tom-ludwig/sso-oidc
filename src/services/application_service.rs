@@ -1,5 +1,6 @@
 use anyhow::Error;
 use sqlx::{Pool, Postgres};
+use uuid::Uuid;
 
 use crate::models::application_model::Application;
 
@@ -21,6 +22,7 @@ impl ApplicationClientService {
         .fetch_one(&self.db_pool)
         .await;
 
+        println!("{:?}", result);
         return Ok(result?);
     }
 }
