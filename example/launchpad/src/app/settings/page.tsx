@@ -6,29 +6,24 @@
 "use client";
 
 import Link from "next/link"
-import {Terminal,} from "lucide-react"
+import {Terminal} from "lucide-react"
+import {useEffect, useState} from "react";
+import Navbar from "../../components/Navbar/Navbar";
+import NavbarMobile from "../../components/Navbar/NavbarMobile";
 import {
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import {Card, CardContent, CardHeader, CardTitle,} from "@/components/ui/card"
-import Navbar from "@/components/Navbar/Navbar";
-import NavbarMobile from "@/components/Navbar/NavbarMobile";
-import * as React from "react";
-import {useEffect, useState} from "react";
-import {usePlantData} from "@/hooks/usePlantData/usePlantData";
-import {Alert, AlertTitle} from "@/components/ui/alert";
-import {getVersion} from "@/lib/PlantData/PlantData";
+    BreadcrumbSeparator
+} from "../../components/ui/breadcrumb";
+import {Card, CardContent, CardHeader, CardTitle} from "../../components/ui/card";
+import {Alert, AlertTitle} from "../../components/ui/alert";
+import {getVersion} from "../../lib/data/data";
 
 
 export default function Settings() {
-
-    // Fetch every 5 seconds
-    const {plantData, locationData, loading, error} = usePlantData(5000);
 
     const [version, setVersion] = useState<string>('');
 

@@ -9,8 +9,8 @@ import {ReactNode} from "react";
 import Link from "next/link";
 import {Home, Leaf, LineChart, Package2, PanelLeft, Settings} from "lucide-react";
 import {toast} from "sonner";
-import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet";
-import {Button} from "@/components/ui/button";
+import {Sheet, SheetContent, SheetTrigger} from "../ui/sheet";
+import {Button} from "../../components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,9 +18,9 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import {ModeToggle} from "@/components/mode-toggle";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+} from "../ui/dropdown-menu";
+import {ModeToggle} from "../mode-toggle";
+import {Avatar, AvatarFallback, AvatarImage} from "../ui/avatar";
 import {useRouter} from "next/navigation";
 import axios from "axios";
 
@@ -35,12 +35,16 @@ export default function NavbarMobile({children, site}: Readonly<PlantBlockSkelet
 
     const handleLogout = async () => {
         try {
-            await axios.post('/api/auth/logout')
-            router.push('/')
+            await axios.post('/api/auth/logout', {}, {
+                withCredentials: true,
+            });
         } catch (error) {
-            console.error('Logout failed:', error)
+            console.error('Logout error:', error);
         }
-    }
+
+        // Redirect regardless of API call success
+        window.location.href = '/';
+    };
 
     return (
         <>

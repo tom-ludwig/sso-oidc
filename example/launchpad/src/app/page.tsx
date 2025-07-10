@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import HomePage from "@/components/HomePage/HomePage";
+import HomePage from "../components/HomePage/HomePage";
 
 export const metadata: Metadata = {
     title: "Welcome to SAP Launchpad",

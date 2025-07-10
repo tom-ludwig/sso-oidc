@@ -1,59 +1,22 @@
 "use client";
 
 import Link from "next/link"
+import Navbar from "../../components/Navbar/Navbar";
+import NavbarMobile from "../../components/Navbar/NavbarMobile";
 import {
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card"
-import Navbar from "@/components/Navbar/Navbar";
-import NavbarMobile from "@/components/Navbar/NavbarMobile";
-import * as React from "react";
-import {usePlantData} from "@/hooks/usePlantData/usePlantData";
-import {getLocations} from "@/lib/PlantData/PlantData";
-import {toast} from "sonner";
-import {downloadLogic, getTimeStamp} from "@/lib/utils";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+    BreadcrumbSeparator
+} from "../../components/ui/breadcrumb";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "../../components/ui/card";
+import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
 
 
 export default function Site() {
 
-    // Fetch every 5 seconds
-    const {plantData, locationData, loading, error} = usePlantData(5000);
-
-    // Count active plants
-    const activePlantCount = plantData.filter(plant => plant.status === true).length;
-    // Count inactive plants
-    const inactivePlantCount = plantData.filter(plant => plant.status === false).length;
-    // Count paused plants
-    const pausedPlantCount = plantData.filter(plant => plant.schedule?.paused === true).length
-
-    // Calculate progress value for active plants
-    const progressValueActive = (activePlantCount / plantData.length) * 100;
-    // Calculate progress value for inactive plants
-    const progressValueInactive = (inactivePlantCount / plantData.length) * 100;
-    // Calculate progress value for paused plants
-    const progressValuePaused = (pausedPlantCount / plantData.length) * 100;
-
-    const downloadLocationDataAsJSON = async () => {
-        try {
-            const data = await getLocations();
-            downloadLogic(data, 'locations');
-            toast(`Standorte erfolgreich exportiert.`, {
-                description: getTimeStamp(),
-            });
-        } catch (error) {
-            console.error(error);
-            toast(`Standorte konnten nicht exportiert werden.`, {
-                description: getTimeStamp(),
-            });
-        }
-
-    };
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">

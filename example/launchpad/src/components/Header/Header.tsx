@@ -1,4 +1,4 @@
-import {Button} from "@/components/ui/button";
+import {Button} from "../../components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -6,8 +6,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+} from "../../components/ui/dropdown-menu";
+import {Avatar, AvatarFallback, AvatarImage} from "../../components/ui/avatar";
 import {LogOut} from "lucide-react";
 import {User as AuthUser} from "oidc-client-ts";
 
@@ -18,7 +18,11 @@ interface HeaderProps {
     onLogout: () => void;
 }
 
-export function Header({authenticated, userInfo, onLogin, onLogout}: HeaderProps) {
+export function Header({authenticated, userInfo, onLogin, onLogout}: Readonly<HeaderProps>) {
+    const onSignUp = () => {
+        window.location.href = `${process.env.NEXT_PUBLIC_OAUTH_SERVER_FRONTEND_URL}/register`;
+    };
+
     return (
         <header
             className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -33,6 +37,10 @@ export function Header({authenticated, userInfo, onLogin, onLogout}: HeaderProps
                             Sign In
                         </Button>
                     )}
+
+                    <Button onClick={onSignUp} variant="outline">
+                        Sign Up
+                    </Button>
 
                     {authenticated === true && userInfo && (
                         <DropdownMenu>

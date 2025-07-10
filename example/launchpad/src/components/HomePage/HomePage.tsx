@@ -1,10 +1,10 @@
 'use client'
 
-import {Button} from "@/components/ui/button";
-import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "../../components/ui/button";
+import {Card, CardDescription, CardHeader, CardTitle} from "../../components/ui/card";
 import {CheckCircle, Clock, Users} from "lucide-react";
 import * as React from "react";
-import {Header} from "@/components/Header/Header";
+import {Header} from "../../components/Header/Header";
 import {useRouter} from "next/navigation";
 
 export default function HomePage() {
@@ -18,7 +18,7 @@ export default function HomePage() {
         <div className="flex flex-col min-h-screen">
             {/* Header */}
             <Header
-                authenticated={null}
+                authenticated={false}
                 userInfo={null}
                 onLogin={() => {
                 }}

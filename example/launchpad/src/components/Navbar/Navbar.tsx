@@ -7,8 +7,9 @@
 
 import Link from "next/link";
 import {Home, Leaf, LineChart, Package2, Settings} from "lucide-react";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {toast} from "sonner";
+import {Tooltip, TooltipTrigger} from "@radix-ui/react-tooltip";
+import {TooltipContent, TooltipProvider} from "../ui/tooltip";
 
 
 interface PlantBlockSkeletonProps {
