@@ -39,7 +39,7 @@ export function RegisterForm({
       console.log("Form submitted");
     }
 
-    let username = surname + name;
+    let username = surname + " " + name;
 
     try {
       const response = await axios.post(apiAddress, {
@@ -48,6 +48,11 @@ export function RegisterForm({
         email,
         password,
       });
+            if (response.status == 201) {
+                axios.get("http://localhost:8080/oauth/authorize", {
+                    withCredentials: true,
+                });
+            }
     } catch (err: any) {
       const msg =
         err.response?.data?.message || err.message || "Registration failed";
