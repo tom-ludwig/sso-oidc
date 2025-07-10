@@ -34,7 +34,7 @@ pub async fn authorize(
         Err(_) => {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "An error occured durring client id checking".to_string(),
+                "An error occurred during client id checking".to_string(),
             )
                 .into_response();
         }
