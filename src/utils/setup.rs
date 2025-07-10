@@ -94,21 +94,30 @@ async fn setup_router(
     token_issuer: Arc<TokenIssuer>,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
+        // New old one (from the Pepe)
         // .allow_origin(["http://localhost:5173".parse::<HeaderValue>().unwrap()])
         // .allow_credentials(true)
         // .allow_methods([http::Method::GET, http::Method::POST])
         // .allow_headers(Any);
-        .allow_origin("http://myapp.local:5173".parse::<HeaderValue>().unwrap())
-        .allow_credentials(true)
-        .allow_methods([http::Method::GET, http::Method::POST])
-        .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
-        .expose_headers([LOCATION]);
+        // .allow_origin("http://myapp.local:5173".parse::<HeaderValue>().unwrap())
+        //
+        // Old old one
+        // .allow_origin("http://localhost:5173/".parse::<HeaderValue>().unwrap())
+        // .allow_credentials(true)
+        // .allow_methods([http::Method::GET, http::Method::POST])
+        // .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
+        // .expose_headers([LOCATION]);
+        //
+        .allow_origin(["http://localhost:5173/login".parse::<HeaderValue>().unwrap(), "http://localhost:5173/".parse::<HeaderValue>().unwrap(), "http://localhost:5173".parse::<HeaderValue>().unwrap()])
+        // .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
 
     let main_router = setup_routes(services, token_issuer).layer(cors);
 
     let port = 8080;
-    // let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    // let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     Ok((main_router, addr))
 }

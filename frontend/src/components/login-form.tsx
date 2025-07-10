@@ -46,36 +46,44 @@ export function LoginForm({
                 console.log("Login success: ", response.data);
                 const authorize = async () => {
                   const url = new URL(
-                    "http://api.myapp.local:8080/oauth/authorize",
+                    // "http://api.myapp.local:8080/oauth/authorize",
+                    "http://localhost:8080/oauth/authorize",
                   );
                   url.searchParams.append("response_type", "code");
                   url.searchParams.append("client_id", "my-client-id");
                   url.searchParams.append(
                     "redirect_uri",
-                    "http://myapp.local:5173/callback",
+                    // "http://myapp.local:5173/callback",
+                    "http://localhost:5173/",
                   );
-                  url.searchParams.append("origin", "http://myapp.local:5173");
+                  // url.searchParams.append("origin", "http://myapp.local:5173");
+                  url.searchParams.append("origin", "http://localhost:5173/");
+                  // try {
+                  //   const response = await fetch(url.toString(), {
+                  //     method: "GET",
+                  //     credentials: "include",
+                  //     // redirect: "manual",
+                  //   });
 
                   try {
-                    const response = await fetch(url.toString(), {
-                      method: "GET",
-                      credentials: "include",
-                      // redirect: "manual",
+                    const response = await axios.get(url.toString(), {
+                        withCredentials: true, // Equivalent to 'credentials: "include"'
+                                            // maxRedirects: 0, // Uncomment if you want to disable following redirects (equivalent to 'redirect: "manual"')
                     });
 
-                    if (response.status === 302 || response.status === 307) {
-                      const location = response.headers.get("Location");
-                      if (location) {
-                        window.location.href = location;
-                      } else {
-                        console.error("Redirect status but no Location header");
-                      }
-                    } else {
-                      console.log(
-                        "Authorization response status:",
-                        response.status,
-                      );
-                    }
+                    // if (response.status === 302 || response.status === 307) {
+                    //   const location = response.headers.get("Location");
+                    //   if (location) {
+                    //     window.location.href = location;
+                    //   } else {
+                    //     console.error("Redirect status but no Location header");
+                    //   }
+                    // } else {
+                    //   console.log(
+                    //     "Authorization response status:",
+                    //     response.status,
+                    //   );
+                    // }
                     console.log("Final response:", response);
                   } catch (err) {
                     console.error("Authorization fetch failed", err);

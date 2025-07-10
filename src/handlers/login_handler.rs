@@ -12,6 +12,7 @@ pub async fn authenticate_user(
     services: Arc<ServicesConfig>,
     Json(login_request): Json<LoginRequest>,
 ) -> impl IntoResponse {
+    dbg!("Here we go again.");
     let user_has_right_credentials = services.user_service.auth_user(&login_request);
     if user_has_right_credentials.await.is_some_and(|x| x) {
         let user = services.user_service.get_user(&login_request.email);

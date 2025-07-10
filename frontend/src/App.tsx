@@ -1,5 +1,4 @@
 import {LoginForm} from "@/components/login-form";
-import axios from "axios";
 import { RegisterForm } from "@/components/register-form";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
