@@ -75,19 +75,7 @@ export function LoginForm({
                     withCredentials: true,
                   },
                 );
-                console.log("Login success: ", response.data);
-                // <<<<<<< HEAD
-
-                // if (response.status == 200) {
-                //   window.location.href =
-                //     `${apiAddress}/authorize?` +
-                //     new URLSearchParams({
-                //       response_type: "code",
-                //       client_id: "sap_concur_client_001",
-                //       redirect_uri:
-                //         "https://www.concursolutions.com/auth/callback",
-                //     }).toString();
-                // }
+                // console.log("Login success: ", response.data);
 
                 if (response.status === 200) {
                   // Build OAuth authorization URL with the same parameters from the original request
@@ -107,29 +95,7 @@ export function LoginForm({
 
                   window.location.href = `${apiAddress}/authorize?${authParams.toString()}`;
                 }
-                // window.location.href = apiAddress + "/authorize";
-                // =======
-                //                 const authorize = async () => {
-                //                   const url = new URL("http://localhost:8080/oauth/authorize");
-                //                   url.searchParams.append("response_type", "code");
-                //                   url.searchParams.append("client_id", "my-client-id");
-                //                   url.searchParams.append(
-                //                     "redirect_uri",
-                //                     "http://localhost:5173/",
-                //                   );
-                //                   url.searchParams.append("origin", "http://localhost:5173/");
-                //
-                //                   try {
-                //                     const response = await axios.get(url.toString(), {
-                //                       withCredentials: true,
-                //                     });
-                //                     console.log("Final response:", response);
-                //                   } catch (err) {
-                //                     console.error("Authorization fetch failed", err);
-                //                   }
-                //                 };
-                //                 authorize();
-                // >>>>>>> origin/master
+                
               } catch (err: any) {
                 const msg =
                   err.response?.data?.message || err.message || "Login failed";

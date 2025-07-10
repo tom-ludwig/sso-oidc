@@ -151,7 +151,7 @@ export function decodeIdToken(idToken: string): UserInfo {
     const decodedPayload = base64UrlDecode(payload);
     const claims = JSON.parse(decodedPayload);
     
-    console.log('Decoded ID token claims:', claims);
+    // console.log('Decoded ID token claims:', claims);
     
     // Extract user information from the actual token claims
     return {
@@ -270,7 +270,7 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
     if (urlState && storedState && urlState === storedState) {
     */
       try {
-        console.log('Found auth code in URL, exchanging for tokens (CSRF protection disabled)...');
+        // console.log('Found auth code in URL, exchanging for tokens (CSRF protection disabled)...');
         // Exchange auth code for tokens
         const tokenResponse = await exchangeCodeForTokens(urlAuthCode);
         storeTokens(tokenResponse);
@@ -307,7 +307,7 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
   
   if (authCode) {
     try {
-      console.log('Found auth code from session, exchanging for tokens...');
+      // console.log('Found auth code from session, exchanging for tokens...');
               // Exchange auth code for tokens
         const tokenResponse = await exchangeCodeForTokens(authCode);
         storeTokens(tokenResponse);
