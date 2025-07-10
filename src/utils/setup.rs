@@ -4,14 +4,16 @@ use crate::services::authorize_code_service::AuthorizeCodeService;
 use crate::services::config::application_service::ApplicationService;
 use crate::services::config::tenant_service::TenantService;
 use crate::services::session_service::SessionService;
-use crate::services::user_service::UserService;
-use crate::utils::config_loader::{load_applications_config, load_tenants_config};
+use crate::services::user_service:: UserService;
+use crate::utils::config_loader::{
+    load_applications_config, load_tenants_config, load_users_config,
+};
 use crate::utils::database::create_postgres_pool;
 use crate::utils::redis_utils::create_redis_pool;
 use crate::utils::token_verifier::TokenVerifier;
 use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenIssuer};
 use axum::Router;
-use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
+use bb8_redis::{bb8::Pool as RedisPool, RedisConnectionManager};
 use http::{HeaderName, HeaderValue, Method};
 use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
@@ -32,9 +34,9 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
     );
 
     let services = setup_services(sqlx_pool.clone(), redis_pool);
-    let (tenant_service, application_service) = setup_config_services(sqlx_pool);
+    let (tenant_service, application_service, user_service) = setup_config_services(sqlx_pool);
 
-    setup_configurations(tenant_service, application_service)
+    setup_configurations(tenant_service, application_service, user_service)
         .await
         .expect("Failed to load configurations");
 
@@ -63,17 +65,15 @@ fn setup_jwks() -> Result<serde_json::Value, anyhow::Error> {
     match generate_jwk_set_from_cert("keys/public.pem") {
         Ok(jwk_set) => {
             return Ok(jwk_set);
-            // println!("JWK Set: {}", jwk_set);
         }
         Err(e) => {
             return Err(e);
-            // eprintln!("Error generating JWK Set: {}", e);
         }
     }
 }
 
-async fn setup_databases()
--> Result<(SqlxPool<Postgres>, RedisPool<RedisConnectionManager>), anyhow::Error> {
+async fn setup_databases(
+) -> Result<(SqlxPool<Postgres>, RedisPool<RedisConnectionManager>), anyhow::Error> {
     let sqlx_pool = create_postgres_pool()
         .await
         .expect("Failed to create Postgres Connection Pool");
@@ -102,11 +102,12 @@ fn setup_services(
     })
 }
 
-fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, ApplicationService) {
+fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, ApplicationService, UserService) {
     let tenant_service = TenantService::new(sqlx_pool.clone());
-    let application_service = ApplicationService::new(sqlx_pool);
+    let application_service = ApplicationService::new(sqlx_pool.clone());
+    let user_service = UserService::new(sqlx_pool);
 
-    (tenant_service, application_service)
+    (tenant_service, application_service, user_service)
 }
 
 async fn setup_router(
@@ -127,7 +128,6 @@ async fn setup_router(
 
     let port = 8080;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    // let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
     Ok((main_router, addr))
 }
@@ -135,9 +135,11 @@ async fn setup_router(
 async fn setup_configurations(
     tenant_service: TenantService,
     application_service: ApplicationService,
+    user_service: UserService,
 ) -> Result<(), anyhow::Error> {
     let tenants_config = load_tenants_config("config/tenants.yaml").await?;
     let applications_config = load_applications_config("config/applications.yaml").await?;
+    let users_config = load_users_config("config/users.yaml").await?;
 
     for tenant in tenants_config.tenants {
         let tenant_id = tenant.id;
@@ -154,6 +156,16 @@ async fn setup_configurations(
             .is_err()
         {
             println!("Application {application_id} already exists. Skipping...");
+        }
+    }
+
+    for user in users_config.users {
+        let user_id = user.id;
+        if user_service
+            .create_user_without_cookie(user)
+            .await
+            .is_err() {
+            println!("User {user_id} already exists. Skipping...");
         }
     }
 

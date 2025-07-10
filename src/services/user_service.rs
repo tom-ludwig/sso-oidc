@@ -1,3 +1,4 @@
+use crate::models::config::user::User;
 use crate::models::user_models::UserIDSQL;
 use crate::models::user_models::UserInformation;
 use crate::utils;
@@ -11,7 +12,7 @@ use crate::{
 };
 use anyhow::Result;
 use sqlx::query;
-use sqlx::{Error as SqlxError};
+use sqlx::Error as SqlxError;
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
@@ -74,6 +75,96 @@ impl UserService {
             }
         }
     }
+
+    pub async fn create_user_without_cookie(
+        &self,
+        mut new_user: User,
+    ) -> Result<Uuid, anyhow::Error> {
+        if new_user.username.trim().is_empty() {
+            return Err(anyhow::anyhow!("Username cannot be empty"));
+        }
+
+        if new_user.id == Uuid::nil() {
+            new_user.id = Uuid::new_v4();
+        }
+
+        sqlx::query!(
+            "
+    INSERT INTO Users (id, tenant_id, username, email, password_hash, is_active)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ",
+            new_user.id,
+            new_user.tenant_id,
+            new_user.username,
+            new_user.email,
+            new_user.password_hash,
+            new_user.is_active,
+        )
+        .execute(&self.db_pool)
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to create user: {}", e))?;
+
+        Ok(new_user.id)
+
+        // sqlx::query!(
+        //     // Need to adjust SQL statement here.
+        //     // "INSERT INTO tenants (id, name) VALUES ($1, $2)",
+        //     new_user.id,
+        //     new_user.username
+        // )
+    }
+
+    // // Old
+    //     let tenant_uuid = Uuid::parse_str(new_user.tenant_id)
+    //         .map_err(|e| anyhow::anyhow!("Failed to parse tenant UUID: {}", e))?;
+    //
+    //     let hashed_password = utils::password_hash_utils::hash_password(new_user.password)
+    //         .map_err(|e| anyhow::anyhow!("Password hashing failed: {}", e))?;
+    //
+    //     let user_uuid = Uuid::new_v4();
+    //
+    //     let result = query!(
+    //         r#"
+    //         INSERT INTO Users (id, tenant_id, username, email, password_hash)
+    //         VALUES ($1, $2, $3, $4, $5)
+    //         ON CONFLICT ON CONSTRAINT users_tenant_id_username_key DO NOTHING
+    //         "#,
+    //         user_uuid,
+    //         tenant_uuid,
+    //         new_user.username,
+    //         new_user.email,
+    //         hashed_password.1
+    //     )
+    //     .execute(&self.db_pool)
+    //     .await;
+    //     println!("{:?}", result);
+    //
+    //     if let Ok(pg_result) = result {
+    //         if pg_result.rows_affected() == 0 {
+    //             println!(
+    //                 "No rows affected: Conflict detected or no changes due to current constraints."
+    //             );
+    //             Err(anyhow::anyhow!(
+    //                 "A user with this email or username already exists"
+    //             ))
+    //         } else {
+    //             println!("User successfully inserted!");
+    //             Ok(())
+    //         }
+    //     } else {
+    //         match result {
+    //             Err(SqlxError::Database(db_err)) => Err(anyhow::anyhow!(
+    //                 "Database error occurred: {}",
+    //                 db_err.message()
+    //             )),
+    //             Err(SqlxError::Configuration(_)) => {
+    //                 Err(anyhow::anyhow!("Configuration error occurred"))
+    //             }
+    //             Err(SqlxError::Tls(_)) => Err(anyhow::anyhow!("TLS error occurred")),
+    //             _ => Err(anyhow::anyhow!("An unexpected error occurred")),
+    //         }
+    //     }
+    // }
 
     pub async fn get_user_id_from_email(
         &self,
