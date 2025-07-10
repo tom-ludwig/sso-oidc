@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
-    iframe.src = 'http://localhost:8080/authorize?origin=http://localhost:5173/app';
+    iframe.src = 'http://localhost:8080/authorize?origin=http://localhost:5173/';
     document.body.appendChild(iframe);
   }, []);
 
