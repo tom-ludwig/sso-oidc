@@ -50,8 +50,8 @@ impl AuthorizeCodeService {
         }
     }
 
-    pub async fn get_client(&self, _client_id: &str) -> Result<String, anyhow::Error> {
-        // TODO: Move to client_services
-        Ok("1234".to_string())
-    }
+    // pub async fn get_client(&self, _client_id: &str) -> Result<String, anyhow::Error> {
+    //     // TODO: Move to client_services
+    //     Ok("1234".to_string())
+    // }
 }

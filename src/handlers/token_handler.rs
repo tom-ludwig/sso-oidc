@@ -35,27 +35,40 @@ pub async fn token(
         return (StatusCode::BAD_REQUEST, "Client ID mismatch").into_response();
     }
 
-    let client = match services
-        .auth_code_service
-        .get_client(&params.client_id)
+    let application_informantion = match services
+        .application_service
+        .get_client_information(&params.client_id)
         .await
     {
-        Ok(data) => data,
+        Ok(application_informantion) => application_informantion,
         Err(_) => return (StatusCode::BAD_REQUEST, "Invalid Client").into_response(),
     };
 
-    // if client.secret != params.client_secret {
-    if client != params.client_secret {
+    if application_informantion.client_secret != params.client_secret {
         return (StatusCode::UNAUTHORIZED, "Invalid client id").into_response();
     }
 
-    // TODO: Database call to get username and email
+    let user_information = match services
+        .user_service
+        .get_user_information(&auth_code.user_id)
+        .await
+    {
+        Ok(user_information) => user_information,
+        Err(_) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error while retriving user information",
+            )
+                .into_response();
+        }
+    };
+
     let id_token = match token_issuer.create_id_token(
         "user identifier",
         &params.client_id,
         auth_code.nonce,
-        Some(auth_code.user_id.clone()), // TODO: email
-        Some(auth_code.user_id.clone()), // TODO: name
+        Some(user_information.email),
+        Some(user_information.username),
         3600,
     ) {
         Ok(id_token) => id_token,

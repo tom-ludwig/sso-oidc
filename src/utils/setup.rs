@@ -1,4 +1,5 @@
 use crate::routes::routes::setup_routes;
+use crate::services::application_service::ApplicationClientService;
 use crate::services::authorize_code_service::AuthorizeCodeService;
 use crate::services::config::application_service::ApplicationService;
 use crate::services::config::tenant_service::TenantService;
@@ -12,11 +13,13 @@ use crate::{models::services_config::ServicesConfig, utils::token_issuer::TokenI
 use axum::Router;
 use bb8_redis::{RedisConnectionManager, bb8::Pool as RedisPool};
 use http::HeaderValue;
-use http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, LOCATION, ORIGIN};
+use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
+
+use super::jwks_utils::generate_jwk_set_from_cert;
 
 pub async fn setup_server() -> Result<(), anyhow::Error> {
     let (sqlx_pool, redis_pool) = setup_databases()
@@ -41,17 +44,32 @@ pub async fn setup_server() -> Result<(), anyhow::Error> {
             .expect("Failed to load Certificates for Token Verifier"),
     );
 
-    let (main_router, addr) = setup_router(services, token_issuer)
+    let jwks = setup_jwks().expect("Failed to create JSON Web Key Set");
+
+    let (listener, addr) = setup_router(services, token_issuer, jwks)
         .await
         .expect("Failed to setup router");
 
     println!("Server running on: {addr}");
     axum_server::bind(addr)
-        .serve(main_router.into_make_service())
+        .serve(listener.into_make_service())
         .await
         .unwrap();
 
     Ok(())
+}
+
+fn setup_jwks() -> Result<serde_json::Value, anyhow::Error> {
+    match generate_jwk_set_from_cert("keys/public.pem") {
+        Ok(jwk_set) => {
+            return Ok(jwk_set);
+            // println!("JWK Set: {}", jwk_set);
+        }
+        Err(e) => {
+            return Err(e);
+            // eprintln!("Error generating JWK Set: {}", e);
+        }
+    }
 }
 
 async fn setup_databases()
@@ -74,11 +92,13 @@ fn setup_services(
     let user_service = UserService::new(sqlx_pool.clone());
     let auth_code_service = AuthorizeCodeService::new(sqlx_pool.clone(), redis_pool.clone());
     let session_service = SessionService::new(sqlx_pool.clone(), redis_pool);
+    let application_service = ApplicationClientService::new(sqlx_pool.clone());
 
     Arc::new(ServicesConfig {
         user_service,
         auth_code_service,
         session_service,
+        application_service,
     })
 }
 
@@ -92,6 +112,7 @@ fn setup_config_services(sqlx_pool: SqlxPool<Postgres>) -> (TenantService, Appli
 async fn setup_router(
     services: Arc<ServicesConfig>,
     token_issuer: Arc<TokenIssuer>,
+    jwks: Value,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
         // New old one (from the Pepe)
@@ -113,7 +134,7 @@ async fn setup_router(
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let main_router = setup_routes(services, token_issuer).layer(cors);
+    let main_router = setup_routes(services, token_issuer, jwks).layer(cors);
 
     let port = 8080;
     let addr = SocketAddr::from(([0, 0, 0, 0], port));

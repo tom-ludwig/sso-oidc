@@ -12,10 +12,23 @@ pub async fn authenticate_user(
     services: Arc<ServicesConfig>,
     Json(login_request): Json<LoginRequest>,
 ) -> impl IntoResponse {
-    dbg!("Here we go again.");
+    // TODO: Return user_id in the first call
     let user_has_right_credentials = services.user_service.auth_user(&login_request);
     if user_has_right_credentials.await.is_some_and(|x| x) {
-        let user = services.user_service.get_user(&login_request.email);
+        let user = match services
+            .user_service
+            .get_user_id_from_email(&login_request.email)
+            .await
+        {
+            Ok(user) => user,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Failed to retrieve mail address",
+                )
+                    .into_response();
+            }
+        };
         let session_id = Uuid::new_v4().to_string();
         let ttl: u64 = 900;
 
