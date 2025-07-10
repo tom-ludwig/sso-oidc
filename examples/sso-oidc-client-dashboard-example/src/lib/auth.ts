@@ -17,6 +17,7 @@ export interface AuthState {
 const ACCESS_TOKEN_KEY = 'access_token';
 const ID_TOKEN_KEY = 'id_token';
 const TOKEN_EXPIRY_KEY = 'token_expiry';
+const OAUTH_STATE_KEY = 'oauth_state';
 
 // Utility functions for cookie management
 export function getCookie(name: string): string | null {
@@ -64,12 +65,43 @@ export function clearTokens(): void {
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(ID_TOKEN_KEY);
   sessionStorage.removeItem(TOKEN_EXPIRY_KEY);
+  sessionStorage.removeItem(OAUTH_STATE_KEY);
+}
+
+// OAuth state management for CSRF protection
+export function storeOAuthState(state: string): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(OAUTH_STATE_KEY, state);
+}
+
+export function getStoredOAuthState(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(OAUTH_STATE_KEY);
+}
+
+export function clearOAuthState(): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(OAUTH_STATE_KEY);
 }
 
 // Check if user is authenticated
 export function isAuthenticated(): boolean {
   const { accessToken, idToken } = getStoredTokens();
   return !!(accessToken && idToken);
+}
+
+// URL parameter utilities
+export function getUrlParameter(name: string): string | null {
+  if (typeof window === 'undefined') return null;
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+export function clearUrlParameters(): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  url.search = '';
+  window.history.replaceState({}, document.title, url.toString());
 }
 
 // OAuth flow functions
@@ -124,8 +156,20 @@ export async function checkSessionAndAuthorize(): Promise<string | null> {
 }
 
 export function redirectToLogin(): void {
+  // Generate and store state for CSRF protection
+  const state = generateRandomState();
+  storeOAuthState(state);
+  
   // Redirect to the OAuth authorize endpoint using the configured URL
-  window.location.href = buildAuthUrl();
+  window.location.href = buildAuthUrl(state);
+}
+
+// Generate a random state for CSRF protection
+function generateRandomState(): string {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
 
 // Main authentication check function
@@ -140,11 +184,49 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
     };
   }
 
-  // If no tokens, check session_id cookie and try to get auth code
+  // Check for auth code in URL parameters (from OAuth redirect)
+  const urlAuthCode = getUrlParameter('code');
+  const urlState = getUrlParameter('state');
+  
+  if (urlAuthCode) {
+    // Validate state parameter for CSRF protection
+    const storedState = getStoredOAuthState();
+    if (urlState && storedState && urlState === storedState) {
+      try {
+        console.log('Found auth code in URL with valid state, exchanging for tokens...');
+        // Exchange auth code for tokens
+        const tokenResponse = await exchangeCodeForTokens(urlAuthCode);
+        storeTokens(tokenResponse);
+        
+        // Clean up URL parameters and state after successful token exchange
+        clearUrlParameters();
+        clearOAuthState();
+        
+        return {
+          isAuthenticated: true,
+          accessToken: tokenResponse.access_token,
+          idToken: tokenResponse.id_token,
+        };
+      } catch (error) {
+        console.error('Token exchange from URL code failed:', error);
+        clearTokens();
+        clearOAuthState();
+        // Clear URL parameters even on failure to avoid retry loops
+        clearUrlParameters();
+      }
+    } else {
+      console.warn('Invalid or missing OAuth state parameter - possible CSRF attack');
+      clearUrlParameters();
+      clearOAuthState();
+    }
+  }
+
+  // If no URL code, check session_id cookie and try to get auth code
   const authCode = await checkSessionAndAuthorize();
   
   if (authCode) {
     try {
+      console.log('Found auth code from session, exchanging for tokens...');
       // Exchange auth code for tokens
       const tokenResponse = await exchangeCodeForTokens(authCode);
       storeTokens(tokenResponse);
@@ -155,7 +237,7 @@ export async function checkAuthenticationStatus(): Promise<AuthState> {
         idToken: tokenResponse.id_token,
       };
     } catch (error) {
-      console.error('Token exchange failed:', error);
+      console.error('Token exchange from session failed:', error);
       clearTokens();
     }
   }

@@ -25,13 +25,13 @@ export const AUTH_CONFIG = {
 };
 
 // Helper function to build the authorization URL
-export function buildAuthUrl(): string {
+export function buildAuthUrl(state?: string): string {
   const params = new URLSearchParams({
     response_type: "code",
     client_id: AUTH_CONFIG.clientId,
     redirect_uri: AUTH_CONFIG.redirectUri,
     scope: AUTH_CONFIG.scopes.join(" "),
-    state: generateRandomState(), // Add CSRF protection
+    state: state || generateRandomState(), // Add CSRF protection
   });
 
   return `${AUTH_CONFIG.authServerUrl}${AUTH_CONFIG.endpoints.authorize}?${params.toString()}`;
