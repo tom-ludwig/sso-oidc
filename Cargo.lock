@@ -2269,6 +2269,7 @@ dependencies = [
  "serde_with",
  "serde_yaml",
  "sqlx",
+ "thiserror",
  "tokio",
  "tower-http",
  "urlencoding",

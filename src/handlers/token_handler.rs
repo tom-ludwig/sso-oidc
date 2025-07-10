@@ -48,7 +48,7 @@ pub async fn token(
         return (StatusCode::UNAUTHORIZED, "Invalid client id").into_response();
     }
 
-    let user_informantion = match services
+    let user_information = match services
         .user_service
         .get_user_information(&auth_code.user_id)
         .await
@@ -67,8 +67,8 @@ pub async fn token(
         "user identifier",
         &params.client_id,
         auth_code.nonce,
-        Some(user_informantion.email),
-        Some(user_informantion.username),
+        Some(user_information.email),
+        Some(user_information.username),
         3600,
     ) {
         Ok(id_token) => id_token,
