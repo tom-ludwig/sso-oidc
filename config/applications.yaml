@@ -1,4 +1,16 @@
 applications:
+  - id: "660e8400-e29b-41d4-a716-446655440002"
+    tenant_id: "550e8400-e29b-41d4-a716-446655440003"
+    name: "SAP Concur"
+    client_id: "sap_concur_client_001"
+    client_secret: "sap_concur_secret_2024"
+    uri: "http://localhost:5555"
+    redirect_uris:
+      - "https://www.concursolutions.com/auth/callback"
+      - "http://localhost:5555/dashboard"
+    post_logout_redirect_uris:
+      - "https://www.concursolutions.com/logout"
+
   - id: "660e8400-e29b-41d4-a716-446655440003"
     tenant_id: "550e8400-e29b-41d4-a716-446655440003"
     name: "SAP Concur"

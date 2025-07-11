@@ -17,7 +17,7 @@ use serde_json::Value;
 use sqlx::{Pool as SqlxPool, Postgres};
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 use super::jwks_utils::generate_jwk_set_from_cert;
 
@@ -90,8 +90,8 @@ fn setup_services(
     redis_pool: RedisPool<RedisConnectionManager>,
 ) -> Arc<ServicesConfig> {
     let user_service = UserService::new(sqlx_pool.clone());
-    let auth_code_service = AuthorizeCodeService::new(sqlx_pool.clone(), redis_pool.clone());
-    let session_service = SessionService::new(sqlx_pool.clone(), redis_pool);
+    let auth_code_service = AuthorizeCodeService::new(redis_pool.clone());
+    let session_service = SessionService::new(redis_pool);
     let application_service = ApplicationClientService::new(sqlx_pool.clone());
 
     Arc::new(ServicesConfig {
@@ -115,7 +115,10 @@ async fn setup_router(
     jwks: Value,
 ) -> Result<(Router, SocketAddr), anyhow::Error> {
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_origin([
+            "http://localhost:5173".parse::<HeaderValue>().unwrap(),
+            "http://localhost:5555".parse::<HeaderValue>().unwrap(),
+        ])
         .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS]) // Specify methods needed
         .allow_headers(vec![
             HeaderName::from_static("content-type"),

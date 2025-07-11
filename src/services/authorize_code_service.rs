@@ -1,20 +1,16 @@
 use bb8_redis::RedisConnectionManager;
-use redis::{AsyncCommands, TypedCommands};
-
-use sqlx::{Pool, Postgres};
+use redis::AsyncCommands;
 
 use crate::models::auth_code_data::AuthCodeData;
 
 #[derive(Clone)]
 pub struct AuthorizeCodeService {
-    db_pool: Pool<Postgres>,
     redis_pool: bb8::Pool<RedisConnectionManager>,
 }
 
 impl AuthorizeCodeService {
-    pub fn new(db_pool: Pool<Postgres>, redis_pool: bb8::Pool<RedisConnectionManager>) -> Self {
+    pub fn new(redis_pool: bb8::Pool<RedisConnectionManager>) -> Self {
         Self {
-            db_pool,
             redis_pool,
         }
     }
@@ -49,9 +45,4 @@ impl AuthorizeCodeService {
             None => Ok(None),
         }
     }
-
-    // pub async fn get_client(&self, _client_id: &str) -> Result<String, anyhow::Error> {
-    //     // TODO: Move to client_services
-    //     Ok("1234".to_string())
-    // }
 }

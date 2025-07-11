@@ -1,20 +1,15 @@
-use bb8::Pool as RedisPool;
 use bb8_redis::RedisConnectionManager;
 use redis::AsyncCommands;
-use sqlx::{Pool, Postgres};
 
 use crate::models::session::SessionData;
 
-#[derive(Clone)]
 pub struct SessionService {
-    db_pool: Pool<Postgres>,
     redis_pool: bb8::Pool<RedisConnectionManager>,
 }
 
 impl SessionService {
-    pub fn new(db_pool: Pool<Postgres>, redis_pool: bb8::Pool<RedisConnectionManager>) -> Self {
+    pub fn new(redis_pool: bb8::Pool<RedisConnectionManager>) -> Self {
         Self {
-            db_pool,
             redis_pool,
         }
     }
