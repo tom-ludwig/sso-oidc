@@ -12,7 +12,7 @@ interface DashboardProps {
     userInfo: User;
 }
 
-export function Dashboard({userInfo}: DashboardProps) {
+export function Dashboard({userInfo}: Readonly<DashboardProps>) {
     const [tasks, setTasks] = useState<string[]>([]);
     const [newTask, setNewTask] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);

@@ -4,11 +4,11 @@ applications:
     name: "SAP Concur"
     client_id: "sap_concur_client_001"
     client_secret: "sap_concur_secret_2024"
-    uri: "https://www.concursolutions.com"
+    uri: "http://localhost:3000"
     redirect_uris:
-      - "https://www.concursolutions.com/auth/callback"
+      - "http://localhost:3000/site"
     post_logout_redirect_uris:
-      - "https://www.concursolutions.com/logout"
+      - "https://localhost:3000/logout"
 
   - id: "660e8400-e29b-41d4-a716-446655440004"
     tenant_id: "550e8400-e29b-41d4-a716-446655440004"

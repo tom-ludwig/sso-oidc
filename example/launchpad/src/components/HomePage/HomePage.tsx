@@ -10,9 +10,13 @@ import {useRouter} from "next/navigation";
 export default function HomePage() {
     const router = useRouter();
 
+    const onGetStarted = () => {
+        router.push('/site');
+    };
+
     const onLogin = () => {
         router.push('/login');
-    };
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -20,10 +24,6 @@ export default function HomePage() {
             <Header
                 authenticated={false}
                 userInfo={null}
-                onLogin={() => {
-                }}
-                onLogout={() => {
-                }}
             />
 
             {/* Hero Section */}
@@ -37,7 +37,7 @@ export default function HomePage() {
                         Streamline your daily operations and enhance productivity with our intuitive Launchpad.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button size="lg" onClick={onLogin} className="text-lg px-8">
+                        <Button size="lg" onClick={onGetStarted} className="text-lg px-8">
                             Get Started
                         </Button>
                         <Button size="lg" variant="outline" className="text-lg px-8">

@@ -10,18 +10,23 @@ import {
 import {Avatar, AvatarFallback, AvatarImage} from "../../components/ui/avatar";
 import {LogOut} from "lucide-react";
 import {User as AuthUser} from "oidc-client-ts";
+import {useRouter} from "next/navigation";
 
 interface HeaderProps {
     authenticated: boolean | null;
     userInfo: AuthUser | null;
-    onLogin: () => void;
-    onLogout: () => void;
 }
 
-export function Header({authenticated, userInfo, onLogin, onLogout}: Readonly<HeaderProps>) {
+export function Header({authenticated, userInfo}: Readonly<HeaderProps>) {
+    const router = useRouter();
+
     const onSignUp = () => {
         window.location.href = `${process.env.NEXT_PUBLIC_OAUTH_SERVER_FRONTEND_URL}/signup`;
     };
+
+    const onLogin = () => {
+        router.push('/login');
+    }
 
     return (
         <header
@@ -66,7 +71,8 @@ export function Header({authenticated, userInfo, onLogin, onLogout}: Readonly<He
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
-                                <DropdownMenuItem onClick={onLogout}>
+                                <DropdownMenuItem onClick={() => {
+                                }}>
                                     <LogOut className="mr-2 h-4 w-4"/>
                                     <span>Log out</span>
                                 </DropdownMenuItem>
