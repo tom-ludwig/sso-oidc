@@ -147,7 +147,7 @@ pub async fn token(
         }
     };
 
-    println!("Issuesing new refresh token");
+    println!("Issuing new refresh token");
 
     // Return response with both JSON body and refresh token cookie
     HttpResponse::builder()
