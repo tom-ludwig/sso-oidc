@@ -1,5 +1,5 @@
 applications:
-  - id: "660e8400-e29b-41d4-a716-446655440003"
+  - id: "660e8400-e29b-41d4-a716-446655440002"
     tenant_id: "550e8400-e29b-41d4-a716-446655440003"
     name: "SAP Concur"
     client_id: "sap_concur_client_001"
@@ -10,6 +10,17 @@ applications:
       - "http://localhost:5555/dashboard"
     post_logout_redirect_uris:
       - "https://www.concursolutions.com/logout"
+
+  - id: "660e8400-e29b-41d4-a716-446655440003"
+    tenant_id: "550e8400-e29b-41d4-a716-446655440003"
+    name: "SAP Concur"
+    client_id: "sap_concur_client_001"
+    client_secret: "sap_concur_secret_2024"
+    uri: "http://localhost:3000"
+    redirect_uris:
+      - "http://localhost:3000/site"
+    post_logout_redirect_uris:
+      - "https://localhost:3000/logout"
 
   - id: "660e8400-e29b-41d4-a716-446655440004"
     tenant_id: "550e8400-e29b-41d4-a716-446655440004"
@@ -32,4 +43,3 @@ applications:
       - "https://console.aws.amazon.com/auth/callback"
     post_logout_redirect_uris:
       - "https://console.aws.amazon.com/logout"
-
