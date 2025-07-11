@@ -46,32 +46,98 @@ export default function Site() {
                     className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
                     <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
                         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-5">
+
+                            <Link href={"http://localhost:5555"}>
+                                <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-2">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-2xl">Analytics</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <CardDescription>Track performance metrics and business
+                                            insights</CardDescription>
+                                    </CardContent>
+                                    <CardFooter>
+                                        <Avatar className="w-12 h-12">
+                                            <AvatarImage src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png"/>
+                                            <AvatarFallback>ANA</AvatarFallback>
+                                        </Avatar>
+                                    </CardFooter>
+                                </Card>
+                            </Link>
+
                             <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-1">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-2xl">TODO</CardTitle>
+                                    <CardTitle className="text-2xl">CRM</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <CardDescription>Write down your todos!</CardDescription>
+                                    <CardDescription>Manage customer relationships and sales pipeline</CardDescription>
                                 </CardContent>
                                 <CardFooter>
                                     <Avatar className="w-12 h-12">
-                                        <AvatarImage
-                                            src="https://icons.veryicon.com/png/o/business/vscode-program-item-icon/todo-2.png"/>
-                                        <AvatarFallback>APP</AvatarFallback>
+                                        <AvatarImage src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"/>
+                                        <AvatarFallback>CRM</AvatarFallback>
                                     </Avatar>
                                 </CardFooter>
                             </Card>
-                            <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-1">
+
+                            <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-4">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-2xl">Snake</CardTitle>
+                                    <CardTitle className="text-2xl">Inventory</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <CardDescription>Play your favorite game - Snake!</CardDescription>
+                                    <CardDescription>Track stock levels and manage warehouse
+                                        operations</CardDescription>
                                 </CardContent>
                                 <CardFooter>
                                     <Avatar className="w-12 h-12">
-                                        <AvatarImage src="https://images.icon-icons.com/348/PNG/512/Snake_35967.png"/>
-                                        <AvatarFallback>APP</AvatarFallback>
+                                        <AvatarImage src="https://cdn-icons-png.flaticon.com/512/3659/3659899.png"/>
+                                        <AvatarFallback>INV</AvatarFallback>
+                                    </Avatar>
+                                </CardFooter>
+                            </Card>
+
+                            <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-6">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-2xl">HR Management</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <CardDescription>Employee records, payroll, and performance
+                                        tracking</CardDescription>
+                                </CardContent>
+                                <CardFooter>
+                                    <Avatar className="w-12 h-12">
+                                        <AvatarImage src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"/>
+                                        <AvatarFallback>HRM</AvatarFallback>
+                                    </Avatar>
+                                </CardFooter>
+                            </Card>
+
+                            <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-7">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-2xl">Project Manager</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <CardDescription>Plan, track, and deliver projects on time</CardDescription>
+                                </CardContent>
+                                <CardFooter>
+                                    <Avatar className="w-12 h-12">
+                                        <AvatarImage src="https://cdn-icons-png.flaticon.com/512/2422/2422601.png"/>
+                                        <AvatarFallback>PM</AvatarFallback>
+                                    </Avatar>
+                                </CardFooter>
+                            </Card>
+
+                            <Card className="hover:bg-gray-900" x-chunk="dashboard-05-chunk-8">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-2xl">Document Manager</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <CardDescription>Store, organize, and share business documents</CardDescription>
+                                </CardContent>
+                                <CardFooter>
+                                    <Avatar className="w-12 h-12">
+                                        <AvatarImage src="https://cdn-icons-png.flaticon.com/512/3659/3659898.png"/>
+                                        <AvatarFallback>DOC</AvatarFallback>
                                     </Avatar>
                                 </CardFooter>
                             </Card>

@@ -18,6 +18,26 @@ interface HeaderProps {
 }
 
 export function Header({authenticated, userInfo}: Readonly<HeaderProps>) {
+    const clearAuthCookies = () => {
+        // Clear access_token cookie
+        document.cookie = 'access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+        document.cookie = `access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+
+        // Clear id_token cookie
+        document.cookie = 'id_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+        document.cookie = `id_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+
+        // Clear for parent domain (if subdomain)
+        const parts = window.location.hostname.split('.');
+        if (parts.length > 2) {
+            const parentDomain = '.' + parts.slice(-2).join('.');
+            document.cookie = `access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${parentDomain}`;
+            document.cookie = `id_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${parentDomain}`;
+        }
+
+        console.log('Auth cookies cleared');
+    };
+
     const router = useRouter();
 
     const onSignUp = () => {
@@ -71,8 +91,7 @@ export function Header({authenticated, userInfo}: Readonly<HeaderProps>) {
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
-                                <DropdownMenuItem onClick={() => {
-                                }}>
+                                <DropdownMenuItem onClick={clearAuthCookies}>
                                     <LogOut className="mr-2 h-4 w-4"/>
                                     <span>Log out</span>
                                 </DropdownMenuItem>

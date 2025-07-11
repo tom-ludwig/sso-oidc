@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use axum::{
-    http::{header::SET_COOKIE, Response as HttpResponse, StatusCode},
-    response::IntoResponse,
     Extension, Json,
+    http::{Response as HttpResponse, StatusCode, header::SET_COOKIE},
+    response::IntoResponse,
 };
 
 use cookie::Cookie;
@@ -30,7 +30,7 @@ pub async fn register_user_handler(
                     return Err((
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Failed to retrieve user id from the database.".to_string(),
-                    ))
+                    ));
                 }
             };
 
@@ -47,11 +47,11 @@ pub async fn register_user_handler(
                     return Err((
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Could not serialize user.".to_string(),
-                    ))
+                    ));
                 }
             };
             Ok(HttpResponse::builder()
-                .status(StatusCode::OK)
+                .status(StatusCode::CREATED)
                 .header(SET_COOKIE, cookie.to_string())
                 .body(json.into())
                 .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response()))
