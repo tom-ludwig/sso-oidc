@@ -13,6 +13,7 @@ export const AUTH_CONFIG = {
   endpoints: {
     authorize: "/oauth/authorize",
     token: "/oauth/token",
+    logout: "/oauth/logout",
   },
 
   // OAuth scopes
