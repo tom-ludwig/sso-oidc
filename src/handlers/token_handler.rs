@@ -1,7 +1,12 @@
 use std::sync::Arc;
 
-use axum::{Extension, Form, Json, http::StatusCode, response::IntoResponse};
+use axum::{
+    Extension, Form,
+    http::{Response as HttpResponse, StatusCode, header::SET_COOKIE},
+    response::IntoResponse,
+};
 use axum_macros::debug_handler;
+use cookie::Cookie;
 
 use crate::{
     models::{
@@ -98,15 +103,57 @@ pub async fn token(
         }
     };
 
-    (
-        StatusCode::OK,
-        Json(TokenResponse {
-            access_token,
-            token_type: "Bearer".into(),
-            expires_in: 3600,
-            id_token,
-            refresh_token: None,
-        }),
-    )
-        .into_response()
+    // Generate refresh token
+    let refresh_token = match token_issuer.create_refresh_token(
+        &auth_code.user_id.to_string(),
+        86400, // 24 hours expiry for refresh token
+    ) {
+        Ok(refresh_token) => refresh_token,
+        Err(_) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to issue refresh token",
+            )
+                .into_response();
+        }
+    };
+
+    // Create HTTP-only cookie for refresh token
+    let refresh_cookie = Cookie::build(("refresh_token", &refresh_token))
+        .path("")
+        .max_age(cookie::time::Duration::seconds(86400)) // 24 hours
+        .http_only(true)
+        .secure(true)
+        .same_site(cookie::SameSite::Lax);
+
+    // Create token response (without refresh_token in JSON)
+    let token_response = TokenResponse {
+        access_token,
+        token_type: "Bearer".into(),
+        expires_in: 3600,
+        id_token,
+        refresh_token: None, // Don't include refresh token in JSON response
+    };
+
+    // Serialize the JSON response
+    let json_body = match serde_json::to_string(&token_response) {
+        Ok(json) => json,
+        Err(_) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to serialize token response",
+            )
+                .into_response();
+        }
+    };
+
+    println!("Issuing new refresh token");
+
+    // Return response with both JSON body and refresh token cookie
+    HttpResponse::builder()
+        .status(StatusCode::OK)
+        .header("Content-Type", "application/json")
+        .header(SET_COOKIE, refresh_cookie.to_string())
+        .body(json_body.into())
+        .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
 }
