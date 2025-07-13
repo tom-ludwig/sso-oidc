@@ -53,7 +53,7 @@ export function Header({authenticated, userInfo}: Readonly<HeaderProps>) {
             className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <h1 className="text-xl font-bold">SAP SE</h1>
+                    <h1 className="text-xl font-bold">S&P</h1>
                 </div>
 
                 <nav className="flex items-center space-x-6">

@@ -30,7 +30,7 @@ export default function HomePage() {
             <section className="py-20 px-4 text-center bg-gradient-to-b from-background to-muted/50">
                 <div className="container mx-auto max-w-4xl">
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                        SAP
+                        S&P
                         <span className="text-primary"> Launchpad</span>
                     </h1>
                     <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -109,7 +109,7 @@ export default function HomePage() {
                         Ready to become CEO?
                     </h2>
                     <p className="text-xl text-muted-foreground mb-8">
-                        Join the SAP family and start using each application with only one login.
+                        Join the S&P family and start using each application with only one login.
                     </p>
                     <Button size="lg" onClick={onLogin} className="text-lg px-8">
                         Start your productivity day
