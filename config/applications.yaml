@@ -1,21 +1,21 @@
 applications:
   - id: "660e8400-e29b-41d4-a716-446655440002"
     tenant_id: "550e8400-e29b-41d4-a716-446655440003"
-    name: "SAP Concur"
-    client_id: "sap_concur_client_001"
-    client_secret: "sap_concur_secret_2024"
+    name: "NexusFlow CRM"
+    client_id: "nexusflow_client_001"
+    client_secret: "nexusflow_secret_2024"
     uri: "http://localhost:5555"
     redirect_uris:
-      - "https://www.concursolutions.com/auth/callback"
+      - "https://www.nexusflow.com/auth/callback"
       - "http://localhost:5555/dashboard"
     post_logout_redirect_uris:
-      - "https://www.concursolutions.com/logout"
+      - "https://www.nexusflow.com/logout"
 
   - id: "660e8400-e29b-41d4-a716-446655440003"
     tenant_id: "550e8400-e29b-41d4-a716-446655440003"
-    name: "SAP Concur"
-    client_id: "sap_concur_client_001"
-    client_secret: "sap_concur_secret_2024"
+    name: "DataVault Portal"
+    client_id: "datavault_client_001"
+    client_secret: "datavault_secret_2024"
     uri: "http://localhost:3000"
     redirect_uris:
       - "http://localhost:3000/site"
@@ -24,22 +24,22 @@ applications:
 
   - id: "660e8400-e29b-41d4-a716-446655440004"
     tenant_id: "550e8400-e29b-41d4-a716-446655440004"
-    name: "Gmail"
-    client_id: "gmail_client_001"
-    client_secret: "gmail_secret_2024"
-    uri: "https://mail.google.com"
+    name: "ChronoMail"
+    client_id: "chronomail_client_001"
+    client_secret: "chronomail_secret_2024"
+    uri: "https://mail.chronotech.com"
     redirect_uris:
-      - "https://mail.google.com/auth/callback"
+      - "https://mail.chronotech.com/auth/callback"
     post_logout_redirect_uris:
-      - "https://mail.google.com/logout"
+      - "https://mail.chronotech.com/logout"
 
   - id: "660e8400-e29b-41d4-a716-446655440005"
     tenant_id: "550e8400-e29b-41d4-a716-446655440005"
-    name: "AWS Console"
-    client_id: "aws_console_client_001"
-    client_secret: "aws_console_secret_2024"
-    uri: "https://console.aws.amazon.com"
+    name: "Aether Compute Console"
+    client_id: "aether_compute_client_001"
+    client_secret: "aether_compute_secret_2024"
+    uri: "https://console.aetherdynamics.com"
     redirect_uris:
-      - "https://console.aws.amazon.com/auth/callback"
+      - "https://console.aetherdynamics.com/auth/callback"
     post_logout_redirect_uris:
-      - "https://console.aws.amazon.com/logout"
+      - "https://console.aetherdynamics.com/logout"
