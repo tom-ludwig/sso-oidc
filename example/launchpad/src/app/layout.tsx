@@ -14,14 +14,10 @@ const inter = Inter({subsets: ["latin"]});
 
 export const metadata: Metadata = {
     title: "Home",
-    description: "The inofficial SAP Launchpad.",
+    description: "The inofficial S&P Launchpad.",
 };
 
-export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout({children,}: Readonly<{ children: React.ReactNode; }>) {
     return (
         <html lang="en">
         <body className={inter.className}>
