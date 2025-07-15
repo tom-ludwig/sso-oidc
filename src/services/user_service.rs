@@ -1,3 +1,4 @@
+use crate::models::config::user::User;
 use crate::models::user_models::UserIDSQL;
 use crate::models::user_models::UserInformation;
 use crate::utils;
@@ -11,7 +12,7 @@ use crate::{
 };
 use anyhow::Result;
 use sqlx::query;
-use sqlx::{Error as SqlxError};
+use sqlx::Error as SqlxError;
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
@@ -73,6 +74,37 @@ impl UserService {
                 _ => Err(anyhow::anyhow!("An unexpected error occurred")),
             }
         }
+    }
+
+    pub async fn create_user_without_cookie(
+        &self,
+        mut new_user: User,
+    ) -> Result<Uuid, anyhow::Error> {
+        if new_user.username.trim().is_empty() {
+            return Err(anyhow::anyhow!("Username cannot be empty"));
+        }
+
+        if new_user.id == Uuid::nil() {
+            new_user.id = Uuid::new_v4();
+        }
+
+        sqlx::query!(
+            "
+    INSERT INTO Users (id, tenant_id, username, email, password_hash, is_active)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ",
+            new_user.id,
+            new_user.tenant_id,
+            new_user.username,
+            new_user.email,
+            new_user.password_hash,
+            new_user.is_active,
+        )
+        .execute(&self.db_pool)
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to create user: {}", e))?;
+
+        Ok(new_user.id)
     }
 
     pub async fn get_user_id_from_email(
