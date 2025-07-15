@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  h2grow-dashboard:
+    image: devlaky/h2grow:dashboard-1.0.0
+    ports:
+      - "80:80"
+    environment:
+      NODE_ENV: production
+      H2GROW_SERVICE_HOSTNAME: 10.24.206.190
+      H2GROW_SERVICE_PORT: 8080
+    networks:
+      - app-network
+    restart: always
+    user: root
+
+  h2grow-service:
+    image: devlaky/h2grow:service-1.0.0
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge

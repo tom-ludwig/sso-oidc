@@ -2,6 +2,7 @@
 COMPOSE_FILE=docker-compose.dev.yaml
 
 include .env.dev
+include .env
 export
 
 # =============================================================================
@@ -9,8 +10,8 @@ export
 # =============================================================================
 
 # TODO: ENTER YOUR CORRECT CONTAINER RUNTIME COMMANDS HERE
-CONTAINER_CMD := podman
-COMPOSE_CMD := podman compose
+CONTAINER_CMD := docker
+COMPOSE_CMD := docker compose
 
 # =============================================================================
 # Local Development Commands
