@@ -1,12 +1,21 @@
-import {cn} from "@/lib/utils";
-import {Button} from "@/components/ui/button";
-import {ButtonIcon} from "@/components/ui/button-arrow-left";
-import {useState} from "react";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {Link} from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ButtonIcon } from "@/components/ui/button-arrow-left";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
 import axios from "axios";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export function RegisterForm({
   className,
@@ -33,15 +42,27 @@ export function RegisterForm({
     let username = surname + " " + name;
 
     try {
-      await axios.post(apiAddress, {
+      let response = await axios.post(apiAddress, {
         tenant_id: "550e8400-e29b-41d4-a716-446655440003",
         username,
         email,
         password,
       });
+      if (response.status !== 201) {
+        return;
+      }
 
-      window.location.href = `http://localhost:3000/site`;
+      response = await axios.get("http://localhost:8080/oauth/login", {
+        withCredentials: true,
+      });
 
+      if (response.status !== 200) {
+        return;
+      }
+
+      axios.get("http://localhost:8080/oauth/authorize", {
+        withCredentials: true,
+      });
     } catch (err: any) {
       const msg =
         err.response?.data?.message || err.message || "Registration failed";
@@ -138,7 +159,7 @@ export function RegisterForm({
           </form>
         </CardContent>
       </Card>
-      {/*{error && (
+      {error && (
         <AlertDialog
           open={!!error}
           onOpenChange={(open) => !open && setError("")}
@@ -153,7 +174,7 @@ export function RegisterForm({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      )}*/}
+      )}
     </div>
   );
 }
