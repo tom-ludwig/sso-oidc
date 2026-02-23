@@ -1,9 +1,9 @@
 tenants:
   - id: "550e8400-e29b-41d4-a716-446655440003"
-    name: "CyberCorp Innovations"
+    name: "SAP SE"
 
   - id: "550e8400-e29b-41d4-a716-446655440004"
-    name: "QuantumTech Solutions"
+    name: "Google LLC"
 
   - id: "550e8400-e29b-41d4-a716-446655440005"
-    name: "Aether Dynamics"
+    name: "Amazon Inc"
